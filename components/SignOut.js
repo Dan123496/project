@@ -11,6 +11,7 @@ class Locations extends Component{
     userLogout = async () => {
         try {
           await AsyncStorage.removeItem('@session_token');
+          await AsyncStorage.removeItem('@user_id');
           alert("Logout Success!")
           this.props.navigation.navigate("Home");
         } catch (error) {

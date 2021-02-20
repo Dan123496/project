@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
-import { FlatList, ActivityIndicator, Text, View, Button, ToastAndroid} from 'react-native';
+import { FlatList, ActivityIndicator, Text, View, Button, ToastAndroid, TouchableOpacity, StyleSheet} from 'react-native';
 
 
 class Locations extends Component{
@@ -14,7 +14,7 @@ class Locations extends Component{
     }
     getData = async () =>{
         const theKey = await AsyncStorage.getItem('@session_token');
-        return fetch('http://10.0.2.2:3333/api/1.0.0/find',{
+        return fetch('http://10.0.2.2:3333/api/1.0.0/find?limit=1000',{
             method: 'get',
             headers: {
                 'content-Type': 'application/json',
@@ -115,7 +115,12 @@ class Locations extends Component{
                     </View>
                     <View>
                         
-                        <Button title='go back' onPress={() => this.props.navigation.goBack()}/>
+                        
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress = {() => this.props.navigation.goBack()}>
+                            <Text style={styles.buttonText}>Go Back</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
                 )
@@ -125,6 +130,22 @@ class Locations extends Component{
 
 
 }
+const styles = StyleSheet.create({
+    
+    button: {
+        alignItems: "center",
+        backgroundColor: "blue",
+        padding: 10,
+        margin: 10,
+        borderRadius:10,
+        marginBottom: 50,
+    },
+    buttonText: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: 'white',
+    },
+});
 
 export default Locations;
 

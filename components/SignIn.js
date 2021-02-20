@@ -41,6 +41,7 @@ class SignIn extends Component{
         .then(async (responseJson) => {
             console.log(responseJson);
             await AsyncStorage.setItem('@session_token', responseJson.token);
+            await AsyncStorage.setItem('@user_id', responseJson.id.toString());
             this.setState({email: ""});
             this.setState({password: ""})
             this.props.navigation.navigate("Home");

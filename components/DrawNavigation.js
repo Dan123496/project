@@ -15,9 +15,13 @@ import SignOut from './SignOut';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import Account from './Account';
+import Account_Fav from './Account_Fav';
+import Account_Likes from './Account_Likes';
 import AddReview from './AddReview';
+import AddReview_Tab from './AddReview_Tab';
 import Favourites from './Favourites';
 import Locations from './Locations';
+import EditAccount from './EditAccount';
 import Location_reviews from './Location-reviews';
 
 
@@ -35,7 +39,19 @@ const LocationNavigator = () => {
     );
 
 }
+const AccountNavigator = () => {
 
+    return (
+            
+        <stack.Navigator  screenOptions={{headerShown: false}}>
+            <stack.Screen name="Account" component={Account} />
+            <stack.Screen name="Favourites" component={Account_Fav} />
+            <stack.Screen name="Likes" component={Account_Likes} />
+            <stack.Screen name="Edit" component={EditAccount} />
+        </stack.Navigator>
+    );
+
+}
 const SignNavigator = () => {
 
     return (
@@ -77,7 +93,7 @@ const TabNavigator = () => {
             >
                 <Tab.Screen name="Home" component={Home} />
                 <Tab.Screen name="Locations" component={LocationNavigator} />
-                <Tab.Screen name="Add Review" component={AddReview} />
+                <Tab.Screen name="Add Review" component={AddReview_Tab} />
                 <Tab.Screen name="Favourites" component={Favourites} />
               </Tab.Navigator>
             
@@ -94,7 +110,7 @@ const DrawNavigation = () => {
                 <draw.Screen  name="Coffida"  component={TabNavigator} options={{drawerIcon: ({focused, size}) => {
                     return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={focused ? 'deepskyblue' : 'grey'}/>;
                 }}} />
-                <draw.Screen name="Account" component={Account} options={{drawerIcon: ({focused, size}) => {
+                <draw.Screen name="Account" component={AccountNavigator} options={{drawerIcon: ({focused, size}) => {
                     return <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} size={size} color={focused ? 'deepskyblue' : 'grey'}/>;
                 }}}  />
                 <draw.Screen name="SignOut" component={SignOut} options={{drawerIcon: ({focused, size}) => {

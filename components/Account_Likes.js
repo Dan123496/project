@@ -5,7 +5,7 @@ import { FlatList, ActivityIndicator, Text, View,ScrollView, Button, ToastAndroi
 
 
 
-class Account extends Component{
+class Account_Likes extends Component{
     constructor(props){
         super(props);
         this.state ={ 
@@ -19,7 +19,7 @@ class Account extends Component{
     getData = async () =>{
         const theKey = await AsyncStorage.getItem('@session_token');
         const id = await AsyncStorage.getItem('@user_id');
-        return fetch('http://10.0.2.2:3333/api/1.0.0/user/'+id,{
+        return fetch('http://10.0.2.2:3333/api/1.0.0/user/1',{
             method: 'get',
             headers: {
                 'content-Type': 'application/json',
@@ -66,44 +66,42 @@ class Account extends Component{
             )
         }else
         {
-            console.log(this.state.AcountListData);
-            console.log(this.state.AcountListData.favourite_locations);
-            const navigation = this.props.navigation;
+        console.log(this.state.AcountListData.liked_reviews);
 
             return (
-
-                <ScrollView>
-                    <Text>Your Account</Text>
+                
+                <View>
                     <View>
-                        <Text>User ID:    {this.state.AcountListData.user_id}</Text>
-                        <Text>First Name: {this.state.AcountListData.first_name}</Text>
-                        <Text>Last Name:  {this.state.AcountListData.last_name}</Text>
-                        <Text>Email:      {this.state.AcountListData.email}</Text>
-                        <Text>:      </Text>
-                        
+                        <FlatList
+                        data={this.state.AcountListData}
+                        renderItem={({item}) =>(
+                            <View>   
+                                <Text>Liked Reviews</Text>
+                                <View>
+                                        {item.reviews.map((t) => (
+                                        <View>    
+                                            {t.review.map((p) => (
+                                            <Text>{p.review_id}</Text>
+                                            
+                                            
+                                            ))}
+                                        </View>    
+                                        ))}
+                                </View>
+                            </View>   
+
+                            
+                        )}
+                        />
                     </View>
+                <View>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress = {() => navigation.navigate('Edit')}>
-                        <Text style={styles.buttonText}>Edit Account Infomantion</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress = {() => navigation.navigate('Favourites')}>
-                        <Text style={styles.buttonText}>Favourite Locations</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress = {() => navigation.navigate('Likes')}>
-                        <Text style={styles.buttonText}>Liked Reviews</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress = {() => navigation.goBack()}>
+                        onPress = {() => this.props.navigation.goBack()}>
                         <Text style={styles.buttonText}>Go Back</Text>
                     </TouchableOpacity>
-
-                </ScrollView>
+                </View>
+            </View>
             )
         }
             
@@ -127,4 +125,4 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 });
-export default Account;
+export default Account_Likes;
