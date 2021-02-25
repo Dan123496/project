@@ -19,7 +19,7 @@ class Account_Fav extends Component{
     getData = async () =>{
         const theKey = await AsyncStorage.getItem('@session_token');
         const id = await AsyncStorage.getItem('@user_id');
-        return fetch('http://10.0.2.2:3333/api/1.0.0/user/1',{
+        return fetch('http://10.0.2.2:3333/api/1.0.0/user/'+id,{
             method: 'get',
             headers: {
                 'content-Type': 'application/json',
@@ -52,6 +52,43 @@ class Account_Fav extends Component{
     componentDidMount(){
         this.getData();
     }
+    testUnFavourite(location){
+        if((location == null )){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var locid = location;
+            this.unFavouriteLocation(locid);
+        }
+    }
+    unFavouriteLocation= async (location) =>
+    {
+        const theKey = await AsyncStorage.getItem('@session_token');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/favourite',{
+            method: 'delete',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then((response)=> {
+            if(response.status === 200){
+            
+                ToastAndroid.show("Removed to Favourites", ToastAndroid.SHORT)
+                this.getData();
+            }else if(response.status === 401){
+                throw 'No logged in ';
+            }else if(response.status === 404){
+                throw 'Bad link ';
+            }else if(response.status === 500){
+                throw 'Sever Error ';
+            }else {
+                throw 'somthing went wrong',response.status   
+            }  
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
+    }
     
     
     render(){
@@ -69,11 +106,11 @@ class Account_Fav extends Component{
             console.log(this.state.AcountListData.favourite_locations);
         
             return (
-                <View>
+                <View style={styles.View}>
                     <Text>Favourite Locations</Text>
 
                     <View>
-                        <FlatList
+                        <FlatList style={styles.view}
                         data={this.state.AcountListData.favourite_locations}
                         renderItem={({item}) =>(
                             <View>  
@@ -88,12 +125,27 @@ class Account_Fav extends Component{
                                 <Text>Average Quality Rating:  {item.avg_quality_rating}</Text>
                                 <Text>Average Clenliness Rating:  {item.avg_clenliness_rating}</Text>
                                 <Text>:  </Text>
+                            
+                                <TouchableOpacity
+                                        style={styles.button}
+                                        onPress = {() => this.testUnFavourite(item.location_id)}>
+                                        <Text style={styles.buttonText}>Remove Favourite Location</Text>
+                                </TouchableOpacity>
+                            
                             </View> 
+                            
                         )}
                         keyExtractor={(item, index) => item.location_id.toString()}
-
+                        
                         />
+                        
                     </View>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress = {() => this.props.navigation.goBack()}
+                    >
+                        <Text style={styles.buttonText}>Go Back</Text>
+                    </TouchableOpacity>
 
 
 
@@ -120,6 +172,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         color: 'white',
+    },
+    View: {
+        flex: 1,
     },
 });
 export default Account_Fav;

@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
-import { FlatList,  ActivityIndicator, ScrollView, Text, TextInput, View, TouchableOpacity, StyleSheet, Alert  } from 'react-native';
+import {  ActivityIndicator, ScrollView, Text, TextInput,  TouchableOpacity, StyleSheet, Alert, ToastAndroid } from 'react-native';
 import RNPickerSelect from "react-native-picker-select";
 
 
 
 
-class AddReview extends Component{
+class EditReview extends Component{
     
     constructor(props) {
         super(props);
@@ -33,7 +33,7 @@ class AddReview extends Component{
     handleBodyInput = (bodyValue) => {
         this.setState({review_body: bodyValue})
     }
-    AddReview = async (overall_rating,price_rating,quality_rating,clenliness_rating,review_body) =>{
+    EditReview = async (overall_rating,price_rating,quality_rating,clenliness_rating,review_body) =>{
         
         if((overall_rating== null || price_rating== null || quality_rating== null || clenliness_rating==null || review_body.trim().length <= 0))
         {
@@ -41,11 +41,12 @@ class AddReview extends Component{
                 {text: 'Ok'}
             ]);
         }else{
-            const id = await AsyncStorage.getItem('@locationId');
+            const locId = await AsyncStorage.getItem('@locationId');
+            const revId = await AsyncStorage.getItem('@reviewId');
             console.log(id,overall_rating,price_rating,quality_rating,clenliness_rating,review_body);
             const theKey = await AsyncStorage.getItem('@session_token');
-            return fetch("http://10.0.2.2:3333/api/1.0.0/location/"+id+"/review",{
-                method: 'POST',
+            return fetch("http://10.0.2.2:3333/api/1.0.0/location/"+locId+"/review/"+revId,{
+                method: 'PATCH',
                 headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' , 'X-Authorization': theKey, },
                 body: JSON.stringify(
                 {
@@ -58,15 +59,25 @@ class AddReview extends Component{
                 })
             })
             .then((response)=> {
-                if(response.status === 201){
+                if(response.status === 200){
                 
                     AsyncStorage.removeItem('@locationId');
-                    Alert.alert("Review.Added!");
-                    this.props.navigation.navigate("Locations");
+                    AsyncStorage.removeItem('@reviewId');
+                    Alert.alert("Review Edited!");
+                    this.props.navigation.navigate("Review");
                     
                     
                 }else if(response.status === 400){
-                    throw 'Failed validation';
+                    throw 'Bad Request';
+                }else if(response.status === 401){
+                    throw 'Unauthorised';
+                }else if(response.status === 403){
+                    throw 'Forbidden';
+                }else if(response.status === 404){
+                    throw 'Not Found';
+                }else if(response.status === 500){
+                    throw 'Server Error';
+                                 
                 }else {
                     throw 'somthing went wrong',response.status
                     
@@ -139,7 +150,7 @@ class AddReview extends Component{
                 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress = {() => this.AddReview(this.state.overall_rating,this.state.price_rating,this.state.quality_rating,this.state.clenliness_rating,this.state.review_body)}
+                    onPress = {() => this.EditReview(this.state.overall_rating,this.state.price_rating,this.state.quality_rating,this.state.clenliness_rating,this.state.review_body)}
                 >
                     <Text style={styles.buttonText}>Add Review</Text>
                 </TouchableOpacity>
@@ -150,17 +161,18 @@ class AddReview extends Component{
                     <Text style={styles.buttonText}>Go Back</Text>
                 </TouchableOpacity>
             </ScrollView>
-        );
+            
+        );  
+        
     }
 }
-
+    
 const styles = StyleSheet.create({
     all: {
         backgroundColor: 'silver',
         flex: 1,
         padding: 20,
     },
-    
     theList: {
         flex: 1,
     },
@@ -170,7 +182,6 @@ const styles = StyleSheet.create({
         padding: 10,
         margin: 15,
         borderRadius:10,
-        
     },
     button2: {
         alignItems: "center",
@@ -179,7 +190,6 @@ const styles = StyleSheet.create({
         margin: 15,
         borderRadius:10,
         marginBottom: 40,
-        
     },
     buttonText: {
         fontSize: 20,
@@ -203,35 +213,37 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
         marginTop:30,
     },
-    
+        
 });
 const pickerSelectStyles = StyleSheet.create({
     placeholder:{
         color: 'grey',
-
     },
     inputIOS: {
-      fontSize: 16,
-      paddingVertical: 12,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderColor: 'gray',
-      borderRadius: 4,
-      color: 'black',
-      paddingRight: 30, // to ensure the text is never behind the icon
+        fontSize: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 4,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
     },
     inputAndroid: {
-      fontSize: 16,
-      margin: 10,
-      borderColor: 'black',
-      borderRadius: 8,
-      color: 'black',
-      backgroundColor: 'white',
-      paddingRight: 30, // to ensure the text is never behind the icon
+        fontSize: 16,
+        margin: 10,
+        borderColor: 'black',
+        borderRadius: 8,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30, // to ensure the text is never behind the icon
     },
-  });
+});
+        
     
-
-
-export default AddReview;
+    
+   
+    
+    
+export default EditReview;
 

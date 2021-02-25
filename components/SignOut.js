@@ -2,18 +2,36 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
 import  { View, Text, TouchableOpacity, StyleSheet  } from 'react-native';
 
-
-
-
 class Locations extends Component{
     
+    
+    componentDidMount(){
+        this.unsubscribe = this.props.navigation.addListener('focus',() =>{
+            this.LoggedInCheck();
+        });
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+        
+        
+    LoggedInCheck = async ()  =>{
+      const value = await AsyncStorage.getItem('@session_token');
+      if (value == null){
+          
+          this.props.navigation.navigate('SignIn');
+      }
+    }
     
     userLogout = async () => {
         try {
           await AsyncStorage.removeItem('@session_token');
           await AsyncStorage.removeItem('@user_id');
           alert("Logout Success!")
-          this.props.navigation.navigate("Home");
+          this.props.navigation.navigate("SignIn");
+
+        
+          
         } catch (error) {
           console.log('AsyncStorage error: ' + error.message);
         }

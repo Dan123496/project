@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
-import { FlatList, ActivityIndicator, Text, View, Button, ToastAndroid, TouchableOpacity, StyleSheet} from 'react-native';
+import { FlatList, ActivityIndicator, Text, View, Button, ToastAndroid, TouchableOpacity, StyleSheet, FlexBox} from 'react-native';
+import  Ionicons  from 'react-native-vector-icons/Ionicons';
 
 
 class Locations extends Component{
@@ -9,7 +10,10 @@ class Locations extends Component{
         super(props);
         this.state ={ 
           isLoading: true,
-          LocationListData: []
+          LocationListData: [],
+          favLoc: [],
+          
+          
         }
     }
     getData = async () =>{
@@ -34,19 +38,44 @@ class Locations extends Component{
           .then((responseJson) => {
     
             this.setState({
-              isLoading: false,
+              
               LocationListData: responseJson,
               
             });
             ToastAndroid.show('sucsess' , ToastAndroid.SHORT);
           })
+          .then(async () =>{
+                this.getLocIds();
+          })
           .catch((error) =>{
             console.log(error);
         });
     }
-    componentDidMount(){
-        this.getData();
+    getLocIds = async() =>{
+        const locId = await AsyncStorage.getItem('@locations');
+        
+        this.setState({favLoc: JSON.parse(locId)})
+        
+        this.setState({isLoading: false})
+        
     }
+    
+    
+    componentDidMount(){
+        this.unsubscribe = this.props.navigation.addListener('focus',() =>{
+            this.getData();
+            
+
+            
+
+            
+        });
+    }
+    
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    
     testAddReview(location){
             if((location == null)){
                 ToastAndroid.show('error' , ToastAndroid.SHORT);
@@ -73,12 +102,142 @@ class Locations extends Component{
         await AsyncStorage.setItem('@locationId', id.toString());
         this.props.navigation.navigate('Reviews')
     }
-  
+    favouriteLocation= async (location) =>
+    {
+        const theKey = await AsyncStorage.getItem('@session_token');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/favourite',{
+            method: 'post',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then(async (response)=> {
+            if(response.status === 200){
+            
+                ToastAndroid.show("Added to Favourites", ToastAndroid.SHORT)
+                var joined = this.state.favLoc.concat(location);
+                this.setState({ favLoc: joined })
+                console.log(this.state.favLoc);
+                await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc));
+                this.getData();
+
+            }else if(response.status === 401){
+                throw 'No logged in ';
+            }else if(response.status === 404){
+                throw 'Bad link ';
+            }else if(response.status === 400){
+                throw 'Bad Request ';
+            }else {
+                throw 'somthing went wrong',response.status   
+            }  
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
+    }
+    unFavouriteLocation= async (location, index) =>
+    {
+        const theKey = await AsyncStorage.getItem('@session_token');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/favourite',{
+            method: 'delete',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then(async (response)=> {
+            if(response.status === 200){
+            
+                ToastAndroid.show("Removed From Favourites", ToastAndroid.SHORT)
+                
+                var t = this.state.favLoc
+                console.log(t);
+                t.splice(index,1);
+                console.log(t);
+                this.setState({favLoc: t })
+                console.log(this.state.favLoc);
+                await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc));
+                this.getData();
+            }else if(response.status === 401){
+                throw 'No logged in ';
+            }else if(response.status === 404){
+                throw 'Bad link ';
+            }else if(response.status === 401){
+                throw 'Unathorised ';
+            }else if(response.status === 500){
+                throw 'Server error ';
+            }else {
+                throw 'somthing went wrong',response.status   
+            }  
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
+    }
+    testFavourite(location){
+        if((location == null )){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var locid = location;
+            this.favouriteLocation(locid);
+        }
+    }testUnFavourite(location){
+        if((location == null )){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var locid = location;
+            this.unFavouriteLocation(locid);
+        }
+    }
+    isFavourite(id){
+        var t = this.state.favLoc.includes(id)
+        
+        
+
+        if(t == true){
+            var index = this.state.favLoc.indexOf(id);
+            
+            console.log(index);
+            return(
+                
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress = {() => this.testUnFavourite(id,index)}>
+                    <Text style={styles.buttonText2}>Remove Favourite</Text>
+                </TouchableOpacity>
+            )
+        }else{
+            return(
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress = {() => this.testFavourite(id)}>
+                    <Text style={styles.buttonText2}>Make a Favourite Location </Text>
+                </TouchableOpacity>
+                )
+        }
+    }
+    addStar(id){
+        var t = this.state.favLoc.includes(id)
+        
+        
+
+        if(t == true){
+
+            return(
+                
+                    <Ionicons name="star" color='gold' size={30} />
+                   
+                 
+                
+            )
+        }
+    }
+    
     
     
     render(){
         
-
         if(this.state.isLoading)
         {
             return(
@@ -92,28 +251,39 @@ class Locations extends Component{
         
             return (
             
-                <View>
-                    <View>
-                        <FlatList
+                <View style={styles.view}>
+                    
+                    <FlatList style={styles.view}
                         data={this.state.LocationListData}
                         renderItem={({item}) =>(
                             <View>
+                                
                                 <Text>Location Name : {item.location_name}</Text>
                                 <Text>Location Name : {item.location_town}</Text>
-                                <Button 
-                                    onPress = {() => this.testToReviews(item.location_id)}
-                                    title="View Reviews"
-                                    color="#841584"/>
-                                <Button 
-                                    onPress = {() => this.testAddReview(item.location_id)}
-                                    title="Add Review"
-                                    color="#841584"/>
+                                <View style={styles.star}>{this.addStar(item.location_id)}</View>
+                                <View  style={styles.box}>
+                                    
+                                    <TouchableOpacity
+                                        style={styles.button}
+                                        onPress = {() => this.testToReviews(item.location_id)}>
+                                        <Text style={styles.buttonText2}>View Reviews</Text>
+                                    </TouchableOpacity>
+                                   
+                                    <TouchableOpacity
+                                        style={styles.button}
+                                        onPress = {() => this.testAddReview(item.location_id)}>
+                                        <Text style={styles.buttonText2}>Add Review</Text>
+                                    </TouchableOpacity>
+                                    {this.isFavourite(item.location_id)}
+                                    
+                                </View>    
                             </View>
+
                         )}
                         keyExtractor={(item, index) => item.location_id.toString()}
                         />
-                    </View>
-                    <View>
+                    
+                    <View >
                         
                         
                         <TouchableOpacity
@@ -133,17 +303,35 @@ class Locations extends Component{
 const styles = StyleSheet.create({
     
     button: {
-        alignItems: "center",
+       
         backgroundColor: "blue",
-        padding: 10,
-        margin: 10,
+        margin: 20,
         borderRadius:10,
-        marginBottom: 50,
+        alignItems: "center",
+        padding: 10,
+     
     },
     buttonText: {
         fontSize: 20,
         fontWeight: "bold",
         color: 'white',
+    },
+    buttonText2: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: 'white',
+    },
+    view: {
+        flex: 1,
+    },
+    box: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: "center",
+    },
+    star: {
+        flexDirection: 'row-reverse',
+        marginLeft: 30,
     },
 });
 

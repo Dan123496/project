@@ -19,7 +19,7 @@ class Account_Likes extends Component{
     getData = async () =>{
         const theKey = await AsyncStorage.getItem('@session_token');
         const id = await AsyncStorage.getItem('@user_id');
-        return fetch('http://10.0.2.2:3333/api/1.0.0/user/1',{
+        return fetch('http://10.0.2.2:3333/api/1.0.0/user/'+id,{
             method: 'get',
             headers: {
                 'content-Type': 'application/json',
@@ -50,7 +50,52 @@ class Account_Likes extends Component{
         });
     }
     componentDidMount(){
-        this.getData();
+        this.unsubscribe = this.props.navigation.addListener('focus',() =>{
+            this.getData();
+            
+        });
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    testUnlike(location, review){
+        if((location == null || review == null)){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var locid = location;
+            var rewid = review
+            this.UnlikeReview(locid,rewid);
+        }
+    }
+    UnlikeReview= async (location, review) =>
+    {
+        const theKey = await AsyncStorage.getItem('@session_token');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/like',{
+            method: 'delete',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then((response)=> {
+            if(response.status === 200){
+            
+                ToastAndroid.show("Unliked", ToastAndroid.SHORT)
+                this.getData();
+                
+            }else if(response.status === 401){
+                throw 'No logged in ';
+            }else if(response.status === 404){
+                throw 'Bad link ';
+            }else if(response.status === 403){
+                throw 'Failed ';
+            }else {
+                throw 'somthing went wrong',response.status   
+            }  
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
     }
     
     
@@ -66,33 +111,52 @@ class Account_Likes extends Component{
             )
         }else
         {
-        console.log(this.state.AcountListData.liked_reviews);
 
             return (
                 
                 <View>
                     <View>
-                        <FlatList
-                        data={this.state.AcountListData}
-                        renderItem={({item}) =>(
+                        
                             <View>   
                                 <Text>Liked Reviews</Text>
                                 <View>
-                                        {item.reviews.map((t) => (
+                                        
                                         <View>    
-                                            {t.review.map((p) => (
-                                            <Text>{p.review_id}</Text>
-                                            
-                                            
-                                            ))}
+                                            <FlatList
+                                                data={this.state.AcountListData.liked_reviews}
+                                                renderItem={({item}) =>(
+                                                    <View>
+                                                
+                                                    <Text>Name:  {item.location.location_name}</Text>
+                                                    <Text>Location:  {item.location.location_name}</Text>
+                                                    <Text>:</Text>
+                                                    <Text>Review number:  {item.review.review_id}</Text>
+                                                    <Text>Overall Rating:  {item.review.overall_rating}</Text>
+                                                    <Text>Price Rating:  {item.review.price_rating}</Text>
+                                                    <Text>Quality Rating:  {item.review.quality_rating}</Text>
+                                                    <Text>Clenliness Rating:  {item.review.clenliness_rating}</Text>
+                                                    <Text>Comment:  {item.review.review_body}</Text>
+                                                    <TouchableOpacity
+                                                        style={styles.button}
+                                                        onPress = {() => this.testUnlike(item.location.location_id,item.review.review_id)}>
+                                                        <Text style={styles.buttonText}>Unlike</Text>
+                                                    </TouchableOpacity>
+                                                    
+    
+                                                    
+                                                </View>
+                                                
+                                                )}
+                                                keyExtractor={(item) => item.review.review_id.toString()}
+                                                />
                                         </View>    
-                                        ))}
+                                       
                                 </View>
                             </View>   
 
                             
-                        )}
-                        />
+                        
+                        
                     </View>
                 <View>
                     <TouchableOpacity

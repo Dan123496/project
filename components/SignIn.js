@@ -4,7 +4,6 @@ import  { View, Text,  StyleSheet, TouchableOpacity, TextInput, ScrollView, Toas
 
 
 
-
 class SignIn extends Component{
     
 
@@ -14,7 +13,101 @@ class SignIn extends Component{
         this.state = {
             email: "",
             password: "",
+            ListData: [],
+            ListData2: null,
+            favouritesArray: [],
+            likedArray: [],
+            
         };
+    }
+
+    componentDidMount(){
+        this.unsubscribe = this.props.navigation.addListener('focus',() =>{
+            this.LoggedInCheck();
+        });
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+        
+        
+    LoggedInCheck = async ()  =>{
+      const value = await AsyncStorage.getItem('@session_token');
+      if (!(value == null)){
+        this.props.navigation.navigate('SignOut');
+
+          
+      }
+    }
+    
+    getFav = async () =>{
+        const theKey = await AsyncStorage.getItem('@session_token');
+        const id = await AsyncStorage.getItem('@user_id');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/user/'+id,{
+            method: 'get',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json()
+                
+            }else if(response.status === 401){
+                throw 'not logged in';
+            }else{
+                throw 'something went wrong';
+            }
+        })
+          .then((responseJson) => {
+    
+            this.setState({
+              
+              ListData: responseJson,
+              
+              
+              
+            })
+            
+            
+        })
+                .then(async () => {
+                    this.inFav(); 
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
+    }
+    inFav= async() => {
+        var joined= [];
+        this.state.ListData.favourite_locations.map((v) => (
+            joined = joined.concat(v.location_id)
+                   
+
+        ));
+        this.setState({favouritesArray: joined});
+        console.log(this.state.favouritesArray)
+        await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favouritesArray));
+        this.likes();
+
+
+        /*await AsyncStorage.setItem('@favLoc', this.state.favouritesArray);
+        const fac = await AsyncStorage.getItem('@favLoc');
+        console.log(fac);*/
+        
+    }
+    likes= async() =>{
+        var liked= [];
+        this.state.ListData.liked_reviews.map((v) => (
+            liked = liked.concat(v.review.review_id)
+                   
+
+        ));
+        this.setState({likedArray: liked});
+        console.log(this.state.likedArray)
+        await AsyncStorage.setItem('@liked', JSON.stringify(this.state.likedArray));
+        this.props.navigation.navigate('Home');
     }
 
     theSignIn = async () => {
@@ -43,8 +136,14 @@ class SignIn extends Component{
             await AsyncStorage.setItem('@session_token', responseJson.token);
             await AsyncStorage.setItem('@user_id', responseJson.id.toString());
             this.setState({email: ""});
-            this.setState({password: ""})
-            this.props.navigation.navigate("Home");
+            this.setState({password: ""});
+            this.getFav();            
+            
+            
+
+            
+            
+            
         
         })
         .catch((error ) => {
@@ -53,7 +152,7 @@ class SignIn extends Component{
         })
     }
 
-
+    
 
     handleEmailInput = (emailValue) => {
         this.setState({email: emailValue})
@@ -83,7 +182,7 @@ class SignIn extends Component{
     
     
     render(){
-         
+        
         return(
             <ScrollView style= {styles.all}>
                 <View >

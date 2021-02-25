@@ -14,7 +14,23 @@ class Account extends Component{
           AcountListData: []
         }
     }
-    
+    componentDidMount(){
+        this.unsubscribe = this.props.navigation.addListener('focus',() =>{
+            this.LoggedInCheck();
+            this.getData();
+        });
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+        
+        
+    LoggedInCheck = async ()  =>{
+      const value = await AsyncStorage.getItem('@session_token');
+      if (value == null){
+          this.props.navigation.navigate('SignIn');
+      }
+    }
     
     getData = async () =>{
         const theKey = await AsyncStorage.getItem('@session_token');
@@ -49,9 +65,7 @@ class Account extends Component{
             console.log(error);
         });
     }
-    componentDidMount(){
-        this.getData();
-    }
+    
     
     
     render(){
@@ -96,6 +110,11 @@ class Account extends Component{
                         style={styles.button}
                         onPress = {() => navigation.navigate('Likes')}>
                         <Text style={styles.buttonText}>Liked Reviews</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress = {() => navigation.navigate('Review')}>
+                        <Text style={styles.buttonText}>Your Reviews</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}

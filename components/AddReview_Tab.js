@@ -142,12 +142,12 @@ class AddReview_Tab extends Component{
                     <RNPickerSelect style={pickerSelectStyles}
                         placeholder={{ label: "Select a Location....", value: null }}
                         onValueChange={this.handleLocationId} value={this.state.LocId}
-                        items={this.state.LocationListData.map(obj => (
+                        items={this.state.LocationListData.map(item => (
                             {
-                               key: obj.location_id,
-                               label: "  "+obj.location_name+":     "+obj.location_town,
-                               value: obj.location_id,
-                               color: "rgba(77,38,22,1)",
+                               key: item.location_id,
+                               label: "  "+item.location_name+":     "+item.location_town,
+                               value: item.location_id,
+                               color: "black",
                             }))}
                     />
                         
@@ -158,7 +158,6 @@ class AddReview_Tab extends Component{
                     placeholder={{ label: "Select a Rating", value: null }}
                     onValueChange={this.handleOverallInput} value={this.state.overall_rating}
                     items={[
-                        { label: "      0", value: 0 },
                         { label: "      1", value: 1 },
                         { label: "      2", value: 2 },
                         { label: "      3", value: 3 },
@@ -171,7 +170,6 @@ class AddReview_Tab extends Component{
                     placeholder={{ label: "Select a Rating", value: null }}               
                     onValueChange={this.handlePriceInput} value={this.state.price_rating}
                     items={[
-                        { label: "      0", value: 0 },
                         { label: "      1", value: 1 },
                         { label: "      2", value: 2 },
                         { label: "      3", value: 3 },
@@ -184,7 +182,6 @@ class AddReview_Tab extends Component{
                     placeholder={{ label: "Select a Rating", value: null }}               
                     onValueChange={this.handleQualityInput} value={this.state.quality_rating}
                     items={[
-                        { label: "      0", value: 0 },
                         { label: "      1", value: 1 },
                         { label: "      2", value: 2 },
                         { label: "      3", value: 3 },
@@ -197,7 +194,6 @@ class AddReview_Tab extends Component{
                     placeholder={{ label: "Select a Rating", value: null,  }}
                     onValueChange={this.handleClenlinessInput} value={this.state.clenliness_rating}
                     items={[
-                        { label: "      0", value: 0 },
                         { label: "      1", value: 1 },
                         { label: "      2", value: 2 },
                         { label: "      3", value: 3 },
@@ -214,6 +210,12 @@ class AddReview_Tab extends Component{
                     onPress = {() => this.AddReview(this.state.overall_rating,this.state.price_rating,this.state.quality_rating,this.state.clenliness_rating,this.state.review_body)}
                 >
                     <Text style={styles.buttonText}>Add Review</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress = {() => this.props.navigation.goBack()}
+                >
+                    <Text style={styles.buttonText}>Go Back</Text>
                 </TouchableOpacity>
             </ScrollView>
         );

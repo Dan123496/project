@@ -21,10 +21,8 @@ import DrawNavigation from './components/DrawNavigation';
 
 class HelloWorldApp extends Component{
     
-    
-    
-
     render(){
+        
         
         return (
           
