@@ -49,41 +49,7 @@ class Account_Reviews extends Component{
             console.log(error);
         });
     }
-    /*getPhotos = async (location,review) =>{
-        const theKey = await AsyncStorage.getItem('@session_token');
-        const id = await AsyncStorage.getItem('@user_id');
-
-        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo',{
-            method: 'get',
-            headers: {
-                'content-Type': 'application/json',
-                'X-Authorization': theKey,
-            },
-        })
-        .then((response) => {
-            if(response.status === 200){
-                return response.json()
-                
-            }else if(response.status === 401){
-                throw 'not logged in';
-            }else{
-                throw 'something went wrong';
-            }
-        })
-          .then((responseJson) => {
     
-            var obj = JSON.parse(responseJson);
-            this.setState({
-                photos: obj ,
-              
-            });
-            this.printPhoto();
-            ToastAndroid.show('sucsess' , ToastAndroid.SHORT);
-          })
-          .catch((error) =>{
-            console.log(error);
-        });
-    }*/
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus',() =>{
             this.getData();
@@ -162,23 +128,16 @@ class Account_Reviews extends Component{
         await AsyncStorage.setItem('@reviewId', review.toString());
         this.props.navigation.navigate('Camera')
     }
-    /*printPhoto(){
-        <FlatList style={styles.view}
-                            data={this.state.photos}
-                                renderItem={({item, index}) =>(
-                                    <View>   
-                                        <Image style={styles.image} source={item} />
-                                    </View>
-                                )}/>
-
-
-
-           
-       
-            
-                
+    printPhotos(location, review){
+        var t ='http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo';
+        console.log(t);
+          return(
+            <Image style={styles.photo} source={{uri: t}} />
+          );
         
-    }*/
+                                        
+                                        
+    }
     
     
     
@@ -214,7 +173,11 @@ class Account_Reviews extends Component{
                                 <Text>Quality Rating:  {item.review.quality_rating}</Text>
                                 <Text>Clenliness Rating:  {item.review.clenliness_rating}</Text>
                                 <Text>Comment:  {item.review.review_body}</Text>
-                                <Text>Photo: {item.location.photo_path}</Text>
+                                <Text>Photo: </Text>
+                                {this.printPhotos(item.location.location_id, item.review.review_id)}
+                                
+
+                               
                                 <View  style={styles.box}> 
                                     <TouchableOpacity
                                         style={styles.button}
@@ -251,7 +214,6 @@ class Account_Reviews extends Component{
 
 
 }
-//{this.getPhotos(item.location.location_id, item.review.review_id )}
 
 const styles = StyleSheet.create({
      
@@ -277,6 +239,18 @@ const styles = StyleSheet.create({
     view: {
         flex: 1,
     },
+    preview: {
+        flex:1,
+        justifyContent: 'flex-end',
+        alignItems: 'center'
+    },
+    
+    photo: {
+        width: 200,
+        height: 200,
+        flex: 1,
+      },
+    
     
 });
 export default Account_Reviews;
