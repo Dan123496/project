@@ -29,6 +29,10 @@ import Locations from './Locations';
 import EditAccount from './EditAccount';
 import Location_reviews from './Location-reviews';
 import EditReview from './EditReview';
+import Camera from './Camera';
+import Map from './Map';
+
+
 
 
 
@@ -41,9 +45,21 @@ const LocationNavigator = () => {
         <stack.Navigator  screenOptions={{headerShown: false}}>
             <stack.Screen name="Locations" component={Locations} />
             <stack.Screen name="Reviews" component={Location_reviews} />
-            <stack.Screen name="AddReview" component={AddReview} />
+            <stack.Screen name="AddReview" component={AddReview} />     
         </stack.Navigator>
     );
+
+}
+const SearchNavigator = () => {
+
+  return (
+          
+      <stack.Navigator  screenOptions={{headerShown: false}}>
+          <stack.Screen name="Search" component={Search} />
+          <stack.Screen name="Reviews" component={Location_reviews} />
+          <stack.Screen name="AddReview" component={AddReview} />
+      </stack.Navigator>
+  );
 
 }
 const AccountNavigator = () => {
@@ -57,6 +73,8 @@ const AccountNavigator = () => {
             <stack.Screen name="Edit" component={EditAccount} />
             <stack.Screen name="Review" component={Account_Reviews} />
             <stack.Screen name="EditReview" component={EditReview} />
+            <stack.Screen name="Camera" component={Camera} />
+
             
         </stack.Navigator>
     );
@@ -93,6 +111,8 @@ const TabNavigator = () => {
                       iconName = focused ? 'add-circle' : 'add-circle-outline';
                     }else if (route.name === 'Search'){
                       iconName = focused ? 'search-circle' : 'search-circle-outline';
+                    }else if (route.name === 'Map'){
+                      iconName = focused ? 'map' : 'map-outline';
                     }
         
                     // You can return any component that you like here!
@@ -107,7 +127,9 @@ const TabNavigator = () => {
                 <Tab.Screen name="Home" component={Home} />
                 <Tab.Screen name="Locations" component={LocationNavigator} />
                 <Tab.Screen name="Add Review" component={AddReview_Tab} />
-                <Tab.Screen name="Search" component={Search} />
+                <Tab.Screen name="Search" component={SearchNavigator}  />
+                <Tab.Screen name="Map" component={Map}  />
+
               </Tab.Navigator>
             
     );

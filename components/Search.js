@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
 import { SearchBar } from 'react-native-elements';
 import { FlatList, Text,  View, TouchableOpacity, StyleSheet,  ToastAndroid } from 'react-native';
+import  Ionicons  from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from "react-native-picker-select";
 import CheckBox from '@react-native-community/checkbox';
 
@@ -22,6 +23,7 @@ class Search extends Component
         AvgClenliness: null,
         toggleFavBox: false,
         toggleYourBox: false,
+        favLoc: [],
       };
     }
     
@@ -109,12 +111,169 @@ class Search extends Component
         }
             
     }
+    testAddReview(location){
+        if((location == null)){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var id = location;
+            
+            this.addReview(id);
+        }
+    }
+    addReview = async (id) =>{
+        await AsyncStorage.setItem('@locationId', id.toString());
+        this.props.navigation.navigate('AddReview')
+    }
+    testToReviews(location2){
+        if((location2 == null)){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var id = location2;
+            
+            this.toReviews(id);
+        }
+    }
+    toReviews = async (id) =>{
+        await AsyncStorage.setItem('@locationId', id.toString());
+        this.props.navigation.navigate('Reviews')
+    }
+    testFavourite(location){
+        if((location == null )){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var locid = location;
+            this.favouriteLocation(locid);
+        }
+    }
+    testUnFavourite(location){
+        if((location == null )){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            var locid = location;
+            this.unFavouriteLocation(locid);
+        }
+    }
+    favouriteLocation= async (location) =>
+    {
+        const theKey = await AsyncStorage.getItem('@session_token');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/favourite',{
+            method: 'post',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then(async (response)=> {
+            if(response.status === 200){
+            
+                ToastAndroid.show("Added to Favourites", ToastAndroid.SHORT)
+                var joined = this.state.favLoc.concat(location);
+                this.setState({ favLoc: joined })
+                console.log(this.state.favLoc);
+                await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc));
+
+            }else if(response.status === 401){
+                throw 'No logged in ';
+            }else if(response.status === 404){
+                throw 'Bad link ';
+            }else if(response.status === 400){
+                throw 'Bad Request ';
+            }else {
+                throw 'somthing went wrong',response.status   
+            }  
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
+    }
+    unFavouriteLocation= async (location, index) =>
+    {
+        const theKey = await AsyncStorage.getItem('@session_token');
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/favourite',{
+            method: 'delete',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then(async (response)=> {
+            if(response.status === 200){
+            
+                ToastAndroid.show("Removed From Favourites", ToastAndroid.SHORT)
+                
+                var t = this.state.favLoc
+                console.log(t);
+                t.splice(index,1);
+                console.log(t);
+                this.setState({favLoc: t })
+                console.log(this.state.favLoc);
+                await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc));
+                this.getData();
+            }else if(response.status === 401){
+                throw 'No logged in ';
+            }else if(response.status === 404){
+                throw 'Bad link ';
+            }else if(response.status === 401){
+                throw 'Unathorised ';
+            }else if(response.status === 500){
+                throw 'Server error ';
+            }else {
+                throw 'somthing went wrong',response.status   
+            }  
+        })
+        .catch((error) =>{
+            console.log(error);
+        });
+    }
+    isFavourite(id){
+        var t = this.state.favLoc.includes(id)
+        
+        
+
+        if(t == true){
+            var index = this.state.favLoc.indexOf(id);
+            
+            console.log(index);
+            return(
+                
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress = {() => this.testUnFavourite(id,index)}>
+                    <Text style={styles.buttonText2}>Remove Favourite</Text>
+                </TouchableOpacity>
+            )
+        }else{
+            return(
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress = {() => this.testFavourite(id)}>
+                    <Text style={styles.buttonText2}>Make a Favourite Location </Text>
+                </TouchableOpacity>
+                )
+        }
+    }
+    addStar(id){
+        var t = this.state.favLoc.includes(id)
+        
+        
+
+        if(t == true){
+
+            return(
+                
+                    <Ionicons name="star" color='gold' size={30} />
+                   
+                 
+                
+            )
+        }
+    }
     
     render() {
         
     
         return (
-            <View>
+            <View style={styles.view}>
                 <SearchBar style={styles.search}
                     placeholder="Search "
                     onChangeText={this.updateSearch}
@@ -196,22 +355,24 @@ class Search extends Component
                             onValueChange={this.handleYourBox}
                         />
                     </View>
-                </View>
-                
                     
-                                          
+
+                </View>
                 <TouchableOpacity
                         style={styles.button}
                         onPress = {() => this.searchAll(this.state.search, this.state.AvgOverall, this.state.AvgPrice, this.state.AvgQuality, this.state.AvgClenliness,this.state.toggleFavBox, this.state.toggleYourBox)}>
                         <Text style={styles.buttonText}>Search</Text>
                 </TouchableOpacity>
-
                 
-                        
-                    <FlatList 
+                    
+                                          
+                
+                
+                <View style={styles.view}>    
+                    <FlatList style={styles.view}
                         data={this.state.SearchListData}
                         renderItem={({item}) =>(
-                        <View>
+                        <View >
                             <Text>Location Name : {item.location_name}</Text>
                             <Text>Location Name : {item.location_town}</Text>
                             <Text>Average Overall Rating:  {item.avg_overall_rating}</Text>
@@ -219,30 +380,37 @@ class Search extends Component
                             <Text>Average Quality Rating:  {item.avg_quality_rating}</Text>
                             <Text>Average Clenliness Rating:  {item.avg_clenliness_rating}</Text>
                                 <Text>:  </Text>
+                            <View style={styles.star}>{this.addStar(item.location_id)}</View> 
                             <View  style={styles.box}>
-                                        
+                            
                                 <TouchableOpacity
-                                    style={styles.button2}
+                                    style={styles.button}
                                     onPress = {() => this.testToReviews(item.location_id)}>
                                     <Text style={styles.buttonText2}>View Reviews</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={styles.button2}
+                                    style={styles.button}
                                     onPress = {() => this.testAddReview(item.location_id)}>
                                     <Text style={styles.buttonText2}>Add Review</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.button2}
-                                    onPress = {() => this.testFavourite(item.location_id)}>
-                                    <Text style={styles.buttonText2}>Make a Favourite Location </Text>
-                                </TouchableOpacity>
+                                {this.isFavourite(item.location_id)}
                             </View>    
                         </View>
+
 
                         )}
                     keyExtractor={(item, index) => item.location_id.toString()}
                     />
+                     <View >
                         
+                        
+                        <TouchableOpacity
+                            style={styles.button3}
+                            onPress = {() => this.props.navigation.goBack()}>
+                            <Text style={styles.buttonText}>Go Back</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>          
                     
 
                 
@@ -276,6 +444,18 @@ const styles = StyleSheet.create({
         padding: 10,
         flexWrap: 'wrap',
         flex: 1,
+     
+    },
+    button3: {
+       
+        backgroundColor: "blue",
+        margin: 20,
+        borderRadius:10,
+        alignItems: "center",
+        padding: 10,
+        marginBottom: 30,
+        
+     
      
     },
     pickers: {
@@ -320,6 +500,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flex: 1,
     },
+    star: {
+        flexDirection: 'row-reverse',
+        marginLeft: 30,
+    },
 });
 const pickerSelectStyles = StyleSheet.create({
     placeholder:{
@@ -346,5 +530,6 @@ const pickerSelectStyles = StyleSheet.create({
       backgroundColor: 'white',
       paddingRight: 80, // to ensure the text is never behind the icon
     },
+    
   });
 export default Search;

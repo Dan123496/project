@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
 import {  ActivityIndicator, ScrollView, Text, TextInput,  TouchableOpacity, StyleSheet, Alert, ToastAndroid } from 'react-native';
 import RNPickerSelect from "react-native-picker-select";
+import Filter from 'bad-words';
 
 
 
@@ -41,9 +42,14 @@ class EditReview extends Component{
                 {text: 'Ok'}
             ]);
         }else{
+            const filter = new Filter(); 
+            filter.addWords('tea','teas', 'cake', 'cakes','pastry', 'pastries');
+            console.log(review_body);
+            review_body = review_body ? filter.clean(review_body) : '';
+            console.log(review_body);
             const locId = await AsyncStorage.getItem('@locationId');
             const revId = await AsyncStorage.getItem('@reviewId');
-            console.log(id,overall_rating,price_rating,quality_rating,clenliness_rating,review_body);
+            console.log(overall_rating,price_rating,quality_rating,clenliness_rating,review_body);
             const theKey = await AsyncStorage.getItem('@session_token');
             return fetch("http://10.0.2.2:3333/api/1.0.0/location/"+locId+"/review/"+revId,{
                 method: 'PATCH',

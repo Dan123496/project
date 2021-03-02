@@ -11,7 +11,8 @@ class Account_Likes extends Component{
         this.state ={ 
           isLoading: true,
           
-          AcountListData: []
+          AcountListData: [],
+          likedIds: [,]
         }
     }
     
@@ -77,10 +78,17 @@ class Account_Likes extends Component{
                 'X-Authorization': theKey,
             },
         })
-        .then((response)=> {
+        .then(async (response)=> {
             if(response.status === 200){
             
                 ToastAndroid.show("Unliked", ToastAndroid.SHORT)
+                const likeId = await AsyncStorage.getItem('@liked');
+                var remid = JSON.parse(likeId);
+                console.log(remid);
+                var index = remid.indexOf(review);
+                remid.splice(index,1);
+                console.log(remid);
+                await AsyncStorage.setItem('@liked', JSON.stringify(remid));
                 this.getData();
                 
             }else if(response.status === 401){

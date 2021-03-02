@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
 import { FlatList,  ActivityIndicator, ScrollView, Text, TextInput, View, TouchableOpacity, StyleSheet, Alert, ToastAndroid } from 'react-native';
 import RNPickerSelect from "react-native-picker-select";
+import Filter from 'bad-words';
 
 
 
@@ -91,6 +92,11 @@ class AddReview_Tab extends Component{
                 {text: 'Ok'}
             ]);
         }else{
+            const filter = new Filter(); 
+            filter.addWords('tea','teas', 'cake', 'cakes','pastry', 'pastries');
+            console.log(review_body);
+            review_body = review_body ? filter.clean(review_body) : '';
+            console.log(review_body);
             const id = this.state.LocId;
             console.log(id,overall_rating,price_rating,quality_rating,clenliness_rating,review_body);
             const theKey = await AsyncStorage.getItem('@session_token');

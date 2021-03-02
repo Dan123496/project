@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
-import { FlatList, ActivityIndicator, Text, View,ScrollView, Button, ToastAndroid, TouchableOpacity, StyleSheet} from 'react-native';
+import { FlatList, ActivityIndicator, Text, View,ScrollView, Button, ToastAndroid, TouchableOpacity, StyleSheet, Image} from 'react-native';
 
 
 
@@ -11,7 +11,8 @@ class Account_Reviews extends Component{
         this.state ={ 
           isLoading: true,
           
-          AcountListData: []
+          AcountListData: [],
+          photos: [],
         }
     }
     
@@ -48,6 +49,41 @@ class Account_Reviews extends Component{
             console.log(error);
         });
     }
+    /*getPhotos = async (location,review) =>{
+        const theKey = await AsyncStorage.getItem('@session_token');
+        const id = await AsyncStorage.getItem('@user_id');
+
+        return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo',{
+            method: 'get',
+            headers: {
+                'content-Type': 'application/json',
+                'X-Authorization': theKey,
+            },
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json()
+                
+            }else if(response.status === 401){
+                throw 'not logged in';
+            }else{
+                throw 'something went wrong';
+            }
+        })
+          .then((responseJson) => {
+    
+            var obj = JSON.parse(responseJson);
+            this.setState({
+                photos: obj ,
+              
+            });
+            this.printPhoto();
+            ToastAndroid.show('sucsess' , ToastAndroid.SHORT);
+          })
+          .catch((error) =>{
+            console.log(error);
+        });
+    }*/
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus',() =>{
             this.getData();
@@ -79,6 +115,7 @@ class Account_Reviews extends Component{
             if(response.status === 200){
             
                 ToastAndroid.show("Deleted", ToastAndroid.SHORT)
+                
                 this.getData();
                 
             }else if(response.status === 401){
@@ -112,6 +149,37 @@ class Account_Reviews extends Component{
         await AsyncStorage.setItem('@reviewId', review.toString());
         this.props.navigation.navigate('EditReview')
     }
+    testPhoto(location, review){
+        if((location == null || review == null)){
+            ToastAndroid.show('error' , ToastAndroid.SHORT);
+        }else{
+            
+            this.AddPhoto(location,review);
+        }
+    }
+    AddPhoto = async (location, review) =>{
+        await AsyncStorage.setItem('@locationId', location.toString());
+        await AsyncStorage.setItem('@reviewId', review.toString());
+        this.props.navigation.navigate('Camera')
+    }
+    /*printPhoto(){
+        <FlatList style={styles.view}
+                            data={this.state.photos}
+                                renderItem={({item, index}) =>(
+                                    <View>   
+                                        <Image style={styles.image} source={item} />
+                                    </View>
+                                )}/>
+
+
+
+           
+       
+            
+                
+        
+    }*/
+    
     
     
     render(){
@@ -136,8 +204,9 @@ class Account_Reviews extends Component{
                             data={this.state.AcountListData.reviews}
                             renderItem={({item}) =>(
                             <View>
+                                <Text>Id:  {item.location.location_id}</Text>
                                 <Text>Name:  {item.location.location_name}</Text>
-                                <Text>Location:  {item.location.location_name}</Text>
+                                <Text>Location:  {item.location.location_town}</Text>
                                 <Text>:</Text>
                                 <Text>Review number:  {item.review.review_id}</Text>
                                 <Text>Overall Rating:  {item.review.overall_rating}</Text>
@@ -145,6 +214,7 @@ class Account_Reviews extends Component{
                                 <Text>Quality Rating:  {item.review.quality_rating}</Text>
                                 <Text>Clenliness Rating:  {item.review.clenliness_rating}</Text>
                                 <Text>Comment:  {item.review.review_body}</Text>
+                                <Text>Photo: {item.location.photo_path}</Text>
                                 <View  style={styles.box}> 
                                     <TouchableOpacity
                                         style={styles.button}
@@ -155,6 +225,11 @@ class Account_Reviews extends Component{
                                         style={styles.button}
                                         onPress = {() => this.testDelete(item.location.location_id,item.review.review_id)}>
                                         <Text style={styles.buttonText2}>Delete</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.button}
+                                        onPress = {() => this.testPhoto(item.location.location_id,item.review.review_id)}>
+                                        <Text style={styles.buttonText2}>Add Photo</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -176,6 +251,8 @@ class Account_Reviews extends Component{
 
 
 }
+//{this.getPhotos(item.location.location_id, item.review.review_id )}
+
 const styles = StyleSheet.create({
      
     button: {

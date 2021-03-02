@@ -10,7 +10,7 @@ class Account_Fav extends Component{
         super(props);
         this.state ={ 
           isLoading: true,
-          
+          favLoc: [],
           AcountListData: []
         }
     }
@@ -70,10 +70,17 @@ class Account_Fav extends Component{
                 'X-Authorization': theKey,
             },
         })
-        .then((response)=> {
+        .then(async (response)=> {
             if(response.status === 200){
             
                 ToastAndroid.show("Removed to Favourites", ToastAndroid.SHORT)
+                const favId = await AsyncStorage.getItem('@locations');
+                this.setState({favLoc: JSON.parse(favId)})
+                var index = this.state.favLoc.indexOf(location);
+                var remid = this.state.favLoc
+                remid.splice(index,1);
+                this.setState({favLoc: remid});
+                await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc));
                 this.getData();
             }else if(response.status === 401){
                 throw 'No logged in ';
