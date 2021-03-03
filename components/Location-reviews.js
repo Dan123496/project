@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
-import { FlatList,  ActivityIndicator, Text, View, TouchableOpacity, StyleSheet, ScrollView, Button,ToastAndroid } from 'react-native';
+import { FlatList,  ActivityIndicator, Text, View, TouchableOpacity, StyleSheet, ScrollView, Image,ToastAndroid } from 'react-native';
 
 
 
@@ -190,6 +190,16 @@ class Location_reviews extends Component{
                 )
         }
     }
+    printPhotos(location, review){
+        var t ='http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo';
+        console.log(t);
+          return(
+            <Image style={styles.photo} source={{uri: t}} />
+          );
+        
+                                        
+                                        
+    }
     
     render(){
              
@@ -220,7 +230,9 @@ class Location_reviews extends Component{
                                                 <Text>Quality Rating:  {item.quality_rating}</Text>
                                                 <Text>Clenliness Rating:  {item.clenliness_rating}</Text>
                                                 <Text>Comment:  {item.review_body}</Text>
-                                                
+                                                <Text>Photo: </Text>
+                                                {this.printPhotos(this.state.location, item.review_id)}
+
                                                 {this.isLiked(this.state.location, item.review_id)}
 
                                                 
@@ -273,6 +285,12 @@ const styles = StyleSheet.create({
     view: {
         flex: 1,
     },
+    
+    photo: {
+        width: 200,
+        height: 200,
+        flex: 1,
+      },
 });
 
 export default Location_reviews;

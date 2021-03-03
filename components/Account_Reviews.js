@@ -13,6 +13,7 @@ class Account_Reviews extends Component{
           
           AcountListData: [],
           photos: [],
+          isImage: true,
         }
     }
     
@@ -53,6 +54,7 @@ class Account_Reviews extends Component{
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus',() =>{
             this.getData();
+            
             
         });
     }
@@ -120,7 +122,7 @@ class Account_Reviews extends Component{
             ToastAndroid.show('error' , ToastAndroid.SHORT);
         }else{
             
-            this.AddPhoto(location,review);
+            this.whichfunction(location,review);
         }
     }
     AddPhoto = async (location, review) =>{
@@ -128,16 +130,63 @@ class Account_Reviews extends Component{
         await AsyncStorage.setItem('@reviewId', review.toString());
         this.props.navigation.navigate('Camera')
     }
-    printPhotos(location, review){
-        var t ='http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo';
-        console.log(t);
-          return(
-            <Image style={styles.photo} source={{uri: t}} />
-          );
+    RemovePhoto = async (location, review) =>{
         
-                                        
-                                        
+            const theKey = await AsyncStorage.getItem('@session_token');
+            
+            return fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo',
+            {
+                method: 'delete',
+                headers: {
+                    
+                    'X-Authorization': theKey,
+                },
+               
+            })
+            .then((response)=> {
+                if(response.status === 200){
+                
+                    ToastAndroid.show("Photo Removed", ToastAndroid.SHORT)
+                    
+                    this.setState({});
+                    
+                }else if(response.status === 401){
+                    throw 'No logged in ';
+                }else if(response.status === 404){
+                    throw 'Bad link ';
+                }else if(response.status === 403){
+                    throw 'Failed ';
+                }else if(response.status === 400){
+                    throw 'Bad Request ';
+                }else if(response.status === 500){
+                        throw 'Bad Request ';
+                }else {
+                    throw 'somthing went wrong',response.status   
+                }  
+            })
+            .catch((error) =>{
+                console.log(error);
+            });
+        }
+    
+    whichfunction = async (location, review) =>{
+        fetch('http://10.0.2.2:3333/api/1.0.0/location/'+location+'/review/'+review+'/photo')
+        .then(res => {
+            if(res.status === 404){
+                this.AddPhoto(location, review);
+            }else if(res.status === 200){
+                this.RemovePhoto(location, review);
+           }
+         })
+         .catch((error) => {
+            console.error(error);
+        })
+    
     }
+       
+            
+        
+    
     
     
     
@@ -147,7 +196,7 @@ class Account_Reviews extends Component{
         if(this.state.isLoading)
         {
             return(
-              <View>
+              <View style={styles.container}>
                 <ActivityIndicator/>
               </View>
             )
@@ -174,8 +223,7 @@ class Account_Reviews extends Component{
                                 <Text>Clenliness Rating:  {item.review.clenliness_rating}</Text>
                                 <Text>Comment:  {item.review.review_body}</Text>
                                 <Text>Photo: </Text>
-                                {this.printPhotos(item.location.location_id, item.review.review_id)}
-                                
+                                <Image style={styles.photo}  source={{uri: 'http://10.0.2.2:3333/api/1.0.0/location/'+item.location.location_id+'/review/'+item.review.review_id+'/photo?time=' + new Date()} } />                                
 
                                
                                 <View  style={styles.box}> 
@@ -192,8 +240,9 @@ class Account_Reviews extends Component{
                                     <TouchableOpacity
                                         style={styles.button}
                                         onPress = {() => this.testPhoto(item.location.location_id,item.review.review_id)}>
-                                        <Text style={styles.buttonText2}>Add Photo</Text>
+                                        <Text style={styles.buttonText2}>Add/Remove Photo</Text>
                                     </TouchableOpacity>
+                                    
                                 </View>
                             </View>
                             )}
@@ -249,6 +298,10 @@ const styles = StyleSheet.create({
         width: 200,
         height: 200,
         flex: 1,
+      },
+      container: {
+        flex: 1,
+        justifyContent: "center"
       },
     
     

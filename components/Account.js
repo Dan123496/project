@@ -74,7 +74,7 @@ class Account extends Component{
         if(this.state.isLoading)
         {
             return(
-              <View>
+              <View style={styles.container}> 
                 <ActivityIndicator/>
               </View>
             )
@@ -145,5 +145,10 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: 'white',
     },
+    container: {
+        flex: 1,
+        justifyContent: "center"
+      },
+    
 });
 export default Account;

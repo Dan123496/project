@@ -116,7 +116,7 @@ class Account_Fav extends Component{
                 <View style={styles.View}>
                     <Text>Favourite Locations</Text>
 
-                    <View>
+                    
                         <FlatList style={styles.view}
                         data={this.state.AcountListData.favourite_locations}
                         renderItem={({item}) =>(
@@ -146,14 +146,14 @@ class Account_Fav extends Component{
                         
                         />
                         
-                    </View>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress = {() => this.props.navigation.goBack()}
-                    >
-                        <Text style={styles.buttonText}>Go Back</Text>
-                    </TouchableOpacity>
-
+                    
+                        <View>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress = {() => this.props.navigation.goBack()}>
+                                <Text style={styles.buttonText}>Go Back</Text>
+                            </TouchableOpacity>
+                        </View>
 
 
 

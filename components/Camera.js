@@ -33,6 +33,7 @@ class Camera extends Component{
             )
             .then((response) => {
                 Alert.alert('Picture Added!');
+                this.props.navigation.goBack();
             })
             .catch((error) => {
                 console.error(error);

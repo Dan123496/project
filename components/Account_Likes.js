@@ -122,18 +122,14 @@ class Account_Likes extends Component{
 
             return (
                 
-                <View>
-                    <View>
-                        
-                            <View>   
+                            <View style={styles.View}>
+                     
                                 <Text>Liked Reviews</Text>
-                                <View>
-                                        
-                                        <View>    
-                                            <FlatList
+                                    
+                                            <FlatList style={styles.View}
                                                 data={this.state.AcountListData.liked_reviews}
                                                 renderItem={({item}) =>(
-                                                    <View>
+                                                <View>
                                                 
                                                     <Text>Name:  {item.location.location_name}</Text>
                                                     <Text>Location:  {item.location.location_name}</Text>
@@ -157,23 +153,15 @@ class Account_Likes extends Component{
                                                 )}
                                                 keyExtractor={(item) => item.review.review_id.toString()}
                                                 />
-                                        </View>    
-                                       
-                                </View>
-                            </View>   
-
-                            
-                        
-                        
-                    </View>
-                <View>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress = {() => this.props.navigation.goBack()}>
-                        <Text style={styles.buttonText}>Go Back</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                                                <View>
+                                                    <TouchableOpacity
+                                                        style={styles.button}
+                                                        onPress = {() => this.props.navigation.goBack()}>
+                                                        <Text style={styles.buttonText}>Go Back</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                        
+                            </View>
             )
         }
             
@@ -195,6 +183,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         color: 'white',
+    },
+    View: {
+        flex: 1,
     },
 });
 export default Account_Likes;
