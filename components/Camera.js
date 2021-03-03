@@ -7,7 +7,7 @@ import {RNCamera} from 'react-native-camera';
 
 class Camera extends Component{
     
-  
+    
 
     takePicture = async() => {
         

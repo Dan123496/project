@@ -28,7 +28,8 @@ class Locations extends Component{
           await AsyncStorage.removeItem('@session_token');
           await AsyncStorage.removeItem('@user_id');
           alert("Logout Success!")
-          this.props.navigation.navigate("SignIn");
+          this.props.navigation.navigate("Coffida", {screen: 'Home'});
+          this.props.navigation.navigate("Account", {screen: 'Account'});
 
         
           

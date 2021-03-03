@@ -61,6 +61,10 @@ class Locations extends Component{
     }
     
     
+        
+        
+    
+    
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus',() =>{
             this.getData();
@@ -202,7 +206,7 @@ class Locations extends Component{
             return(
                 
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.button2}
                     onPress = {() => this.testUnFavourite(id,index)}>
                     <Text style={styles.buttonText2}>Remove Favourite</Text>
                 </TouchableOpacity>
@@ -210,7 +214,7 @@ class Locations extends Component{
         }else{
             return(
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.button2}
                     onPress = {() => this.testFavourite(id)}>
                     <Text style={styles.buttonText2}>Make a Favourite Location </Text>
                 </TouchableOpacity>
@@ -264,13 +268,13 @@ class Locations extends Component{
                                 <View  style={styles.box}>
                                     
                                     <TouchableOpacity
-                                        style={styles.button}
+                                        style={styles.button2}
                                         onPress = {() => this.testToReviews(item.location_id)}>
                                         <Text style={styles.buttonText2}>View Reviews</Text>
                                     </TouchableOpacity>
                                    
                                     <TouchableOpacity
-                                        style={styles.button}
+                                        style={styles.button2}
                                         onPress = {() => this.testAddReview(item.location_id)}>
                                         <Text style={styles.buttonText2}>Add Review</Text>
                                     </TouchableOpacity>
@@ -311,6 +315,15 @@ const styles = StyleSheet.create({
         padding: 10,
      
     },
+    button2: {
+       
+        backgroundColor: "blue",
+        margin: 5,
+        borderRadius:10,
+        alignItems: "center",
+        padding: 10,
+     
+    },
     buttonText: {
         fontSize: 20,
         fontWeight: "bold",
@@ -325,9 +338,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     box: {
+        
         flexDirection: 'row',
-        justifyContent: 'space-around',
         alignItems: "center",
+        justifyContent: 'space-around',
+        flexWrap: 'wrap',
     },
     star: {
         flexDirection: 'row-reverse',

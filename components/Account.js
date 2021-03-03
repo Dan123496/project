@@ -28,7 +28,7 @@ class Account extends Component{
     LoggedInCheck = async ()  =>{
       const value = await AsyncStorage.getItem('@session_token');
       if (value == null){
-          this.props.navigation.navigate('SignIn');
+          this.props.navigation.navigate('SignIn/Out', {screen: 'SignIn'});
       }
     }
     

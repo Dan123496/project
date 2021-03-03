@@ -1,12 +1,42 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
 import { SearchBar } from 'react-native-elements';
-import { FlatList, Text,  View, TouchableOpacity, StyleSheet,  ToastAndroid } from 'react-native';
+import { FlatList, Text,  View, TouchableOpacity, StyleSheet,  ToastAndroid ,PermissionsAndroid} from 'react-native';
 import  Ionicons  from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from "react-native-picker-select";
 import CheckBox from '@react-native-community/checkbox';
+import Geolocation, { requestAuthorization } from 'react-native-geolocation-service';
+import { getDistance } from 'geolib';
+
+async function requestLocationPermission(){
+    try{
+        const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+                title: 'Location Permission',
+                message:
+                    'This app requires access to your location.',
+                    buttonPositive: 'OK',
+                    buttonNegative: 'NO',
+                    buttonNeutral: 'Ask Later',
+                    
+            },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED ){
+            console.log('You can access location');
+            return true 
+                
 
 
+        }else {
+            console.log('Location permission denied');
+            return false;
+        }
+
+    }catch (err){
+        console.warn(err);
+    }
+};
 
 
 class Search extends Component
@@ -23,8 +53,22 @@ class Search extends Component
         AvgClenliness: null,
         toggleFavBox: false,
         toggleYourBox: false,
+        toggleNearBox: false,
+        
         favLoc: [],
+        longitude1: null,
+        latitude1: null,
       };
+    }
+    componentDidMount(){
+        this.unsubscribe = this.props.navigation.addListener('focus',() =>{
+            
+            this.findCoordinates();
+            
+        });
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
     }
     
     updateSearch = (search1) => {
@@ -48,6 +92,10 @@ class Search extends Component
     }
     handleYourBox = (YourValue) => {
         this.setState({toggleYourBox: YourValue})
+    }
+    handleNearBox = (nearValue) => {
+        this.setState({toggleNearBox: nearValue});
+        
     }
     searchAll= async (searched, Overall, Price, Quality, Cleanliness, Fav, Your ) =>
     {
@@ -98,6 +146,7 @@ class Search extends Component
                 SearchListData: responseJson,
                 
                 });
+                
                 ToastAndroid.show('sucsess' , ToastAndroid.SHORT);
             })
             .catch((error) =>{
@@ -111,6 +160,29 @@ class Search extends Component
         }
             
     }
+    findCoordinates =() =>{
+        if(!this.state.locationPermission){
+            this.setState({locationPermission:  requestLocationPermission()});
+        }
+        
+        
+            Geolocation.getCurrentPosition(
+                (position) => {
+                    this.setState({latitude1: position.coords.latitude});
+                    this.setState({longitude1: position.coords.longitude});
+                    
+                },
+                (error) => {
+                    Alert.alert(error.message)
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 20000,
+                    maximumAge: 1000
+                }
+
+            );
+    };
     testAddReview(location){
         if((location == null)){
             ToastAndroid.show('error' , ToastAndroid.SHORT);
@@ -237,7 +309,7 @@ class Search extends Component
             return(
                 
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.button2}
                     onPress = {() => this.testUnFavourite(id,index)}>
                     <Text style={styles.buttonText2}>Remove Favourite</Text>
                 </TouchableOpacity>
@@ -245,7 +317,7 @@ class Search extends Component
         }else{
             return(
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.button2}
                     onPress = {() => this.testFavourite(id)}>
                     <Text style={styles.buttonText2}>Make a Favourite Location </Text>
                 </TouchableOpacity>
@@ -266,6 +338,96 @@ class Search extends Component
                  
                 
             )
+        }
+    }
+    distance(lat1,long1,lat2,long2){
+        
+        
+        return(getDistance(
+
+            { latitude: lat1, longitude:  long1},
+            { latitude: lat2, longitude:  long2}
+        ))
+    }
+    
+    nearOrNot(){
+        if(this.state.toggleNearBox == true){
+
+            return(
+                <FlatList style={styles.view}
+                data={this.state.SearchListData}
+                renderItem={({ item, index })=>{
+                    console.log(this.distance(this.state.latitude1,this.state.longitude1,item.latitude,item.longitude));
+                    if((this.distance(this.state.latitude1,this.state.longitude1,item.latitude,item.longitude))<=10000){
+                     return(   <View >
+                                <Text>Location Name : {item.location_name}</Text>
+                                <Text>Location Town : {item.location_town}</Text>
+                                <Text>Average Overall Rating:  {item.avg_overall_rating}</Text>
+                                <Text>Average Price Rating:  {item.avg_price_rating}</Text>
+                                <Text>Average Quality Rating:  {item.avg_quality_rating}</Text>
+                                <Text>Average Clenliness Rating:  {item.avg_clenliness_rating}</Text>
+                                <Text>Distance:  {this.distance(this.state.latitude1,this.state.longitude1,item.latitude,item.longitude)}m</Text>
+                                    <Text>:  </Text>
+                                <View style={styles.star}>{this.addStar(item.location_id)}</View> 
+                                <View  style={styles.box}>
+                                
+                                    <TouchableOpacity
+                                        style={styles.button2}
+                                        onPress = {() => this.testToReviews(item.location_id)}>
+                                        <Text style={styles.buttonText2}>View Reviews</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.button2}
+                                        onPress = {() => this.testAddReview(item.location_id)}>
+                                        <Text style={styles.buttonText2}>Add Review</Text>
+                                    </TouchableOpacity>
+                                    {this.isFavourite(item.location_id)}
+                                </View>    
+                            </View>
+                     )
+                    }
+                }}
+                        
+                    
+                     keyExtractor={(item, index) => item.location_id.toString()}
+                />
+            )
+        }else if (this.state.toggleNearBox == false){
+            return(
+                <FlatList style={styles.view}
+                        data={this.state.SearchListData}
+                        renderItem={({item}) =>(
+                          
+                            <View >
+                                <Text>Location Name : {item.location_name}</Text>
+                                <Text>Location Town : {item.location_town}</Text>
+                                <Text>Average Overall Rating:  {item.avg_overall_rating}</Text>
+                                <Text>Average Price Rating:  {item.avg_price_rating}</Text>
+                                <Text>Average Quality Rating:  {item.avg_quality_rating}</Text>
+                                <Text>Average Clenliness Rating:  {item.avg_clenliness_rating}</Text>
+                                    <Text>:  </Text>
+                                <View style={styles.star}>{this.addStar(item.location_id)}</View> 
+                                <View  style={styles.box}>
+                                
+                                    <TouchableOpacity
+                                        style={styles.button2}
+                                        onPress = {() => this.testToReviews(item.location_id)}>
+                                        <Text style={styles.buttonText2}>View Reviews</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.button2}
+                                        onPress = {() => this.testAddReview(item.location_id)}>
+                                        <Text style={styles.buttonText2}>Add Review</Text>
+                                    </TouchableOpacity>
+                                    {this.isFavourite(item.location_id)}
+                                </View>    
+                            </View>
+
+
+                        )}
+                    keyExtractor={(item, index) => item.location_id ? item.location_id.toString() : ""}
+                />
+            );
         }
     }
     
@@ -341,7 +503,7 @@ class Search extends Component
                             ]}
                         />
                     </View>
-                    <View style={styles.pickers}>
+                    <View style={styles.pickers2}>
                         <Text>Search Favourites</Text>
                         <CheckBox
                             disabled={false}
@@ -353,6 +515,12 @@ class Search extends Component
                             disabled={false}
                             value={this.state.toggleYourBox}
                             onValueChange={this.handleYourBox}
+                        />
+                        <Text>Search Near You (within 10km)</Text>
+                        <CheckBox
+                            disabled={false}
+                            value={this.state.toggleNearBox}
+                            onValueChange={this.handleNearBox}
                         />
                     </View>
                     
@@ -369,41 +537,8 @@ class Search extends Component
                 
                 
                 <View style={styles.view}>    
-                    <FlatList style={styles.view}
-                        data={this.state.SearchListData}
-                        renderItem={({item}) =>(
-                        <View >
-                            <Text>Location Name : {item.location_name}</Text>
-                            <Text>Location Name : {item.location_town}</Text>
-                            <Text>Average Overall Rating:  {item.avg_overall_rating}</Text>
-                            <Text>Average Price Rating:  {item.avg_price_rating}</Text>
-                            <Text>Average Quality Rating:  {item.avg_quality_rating}</Text>
-                            <Text>Average Clenliness Rating:  {item.avg_clenliness_rating}</Text>
-                                <Text>:  </Text>
-                            <View style={styles.star}>{this.addStar(item.location_id)}</View> 
-                            <View  style={styles.box}>
-                            
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress = {() => this.testToReviews(item.location_id)}>
-                                    <Text style={styles.buttonText2}>View Reviews</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress = {() => this.testAddReview(item.location_id)}>
-                                    <Text style={styles.buttonText2}>Add Review</Text>
-                                </TouchableOpacity>
-                                {this.isFavourite(item.location_id)}
-                            </View>    
-                        </View>
-
-
-                        )}
-                    keyExtractor={(item, index) => item.location_id.toString()}
-                    />
+                    {this.nearOrNot()}
                      <View >
-                        
-                        
                         <TouchableOpacity
                             style={styles.button3}
                             onPress = {() => this.props.navigation.goBack()}>
@@ -438,12 +573,10 @@ const styles = StyleSheet.create({
     button2: {
        
         backgroundColor: "blue",
-        margin: 20,
+        margin: 5,
         borderRadius:10,
         alignItems: "center",
         padding: 10,
-        flexWrap: 'wrap',
-        flex: 1,
      
     },
     button3: {
@@ -462,13 +595,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: "center",
         flexWrap: 'wrap',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
 
     },
     pickers1: {
         flexDirection: 'row',
         alignItems: "center",
         justifyContent: 'space-around',
+        flexWrap: 'wrap',
+
+    },
+    pickers2: {
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: 'center',
         flexWrap: 'wrap',
 
     },
@@ -495,11 +635,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     box: {
+        
         flexDirection: 'row',
-        justifyContent: 'space-around',
         alignItems: "center",
-        flex: 1,
+        justifyContent: 'space-around',
+        flexWrap: 'wrap',
     },
+    
     star: {
         flexDirection: 'row-reverse',
         marginLeft: 30,

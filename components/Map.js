@@ -144,8 +144,8 @@ class Map extends Component{
                     region={{
                         latitude: this.state.latitude,
                         longitude: this.state.longitude,
-                        latitudeDelta: 100,
-                        longitudeDelta: 100,
+                        latitudeDelta: 0.4,
+                        longitudeDelta: 0.4,
                     }}
                     >
                         <Marker
