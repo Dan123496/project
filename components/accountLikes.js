@@ -12,7 +12,7 @@ class accountLikes extends Component {
     }
   }
 
-  async getData () {
+  async getData () { // gets the users information by scenting a get request to the user information endpoint. uses the user id in async storage
     const theKey = await AsyncStorage.getItem('@session_token')
     const id = await AsyncStorage.getItem('@user_id')
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
@@ -43,17 +43,17 @@ class accountLikes extends Component {
       })
   }
 
-  componentDidMount () {
+  componentDidMount () { // runs the login checker when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.getData()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
 
-  testUnlike (location, review) {
+  testUnlike (location, review) { // checks to make sure location id and review id are not null before attempting unlike
     if ((location == null || review == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -71,7 +71,7 @@ class accountLikes extends Component {
     )
   }
 
-  async UnlikeReview (location, review) {
+  async UnlikeReview (location, review) { // Unlikes the review the users click on, using the location id and review id.
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review + '/like', {
       method: 'delete',
@@ -89,7 +89,7 @@ class accountLikes extends Component {
           const index = remid.indexOf(review)
           remid.splice(index, 1)
           console.log(remid)
-          await AsyncStorage.setItem('@liked', JSON.stringify(remid))
+          await AsyncStorage.setItem('@liked', JSON.stringify(remid)) // removes the unliked review id from the liked array in async storeage so the users likes are updated
           this.getData()
         } else if (response.status === 401) {
           throw 'No logged in '
@@ -131,6 +131,7 @@ class accountLikes extends Component {
                 <Text>Quality Rating:  {item.review.quality_rating}</Text>
                 <Text>Clenliness Rating:  {item.review.clenliness_rating}</Text>
                 <Text>Comment:  {item.review.review_body}</Text>
+                <Text>Likes:   {item.review.likes}</Text>
                 <Text>Photo: </Text>
                 {this.printPhotos(item.location.location_id, item.review.review_id)}
                 <TouchableOpacity

@@ -8,7 +8,7 @@ import { getDistance } from 'geolib'
 async function requestLocationPermission () {
   try {
     const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, { // ask the user for permission to access location 
         title: 'Location Permission',
         message: 'This app requires access to your location.',
         buttonPositive: 'OK',
@@ -41,18 +41,18 @@ class Map extends Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount () { // gets the users coordinates and the location information when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.getLocations()
       this.findCoordinates()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
 
-  async getLocations () {
+  async getLocations () { // gets the location information to plot locations on map, by sending get request to the find end point
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/find?limit=1000', {
       method: 'get',
@@ -84,7 +84,7 @@ class Map extends Component {
       })
   }
 
-  findCoordinates = () => {
+  findCoordinates = () => { // finds the users coordinates with geolocation, stores coordinates in state
     if (!this.state.locationPermission) {
       this.setState({ locationPermission: requestLocationPermission() })
     }
@@ -109,7 +109,7 @@ class Map extends Component {
     )
   };
 
-  distance (lat1, long1, lat2, long2) {
+  distance (lat1, long1, lat2, long2) { // calculates the distance between the user and a location 
     return (getDistance(
       { latitude: lat1, longitude: long1 },
       { latitude: lat2, longitude: long2 }
@@ -119,7 +119,7 @@ class Map extends Component {
   render () {
     return (
       <View style={styles.view}>
-        <MapView
+        <MapView // renders a google map view 
           provider={PROVIDER_GOOGLE}
           style={styles.preview}
           region={{
@@ -129,17 +129,17 @@ class Map extends Component {
             longitudeDelta: 0.4
           }}
         >
-          <Marker
+          <Marker // renders a maker for the users location 
             coordinate={{ latitude: this.state.latitude, longitude: this.state.longitude }}
             title={'My Location'}
           />
           {console.log(this.state.LocationListData)}
           {this.state.LocationListData.map((marker, index) => (
-            <Marker
+            <Marker // renders makers for a the locations 
               key={index}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.location_name}
-              description={'distance is:  ' + this.distance(this.state.latitude, this.state.longitude, marker.latitude, marker.longitude) + ' Meters away'}
+              description={'distance is:  ' + this.distance(this.state.latitude, this.state.longitude, marker.latitude, marker.longitude) + ' Meters away'} // adds the distances from the user in the description 
             />
           ))}
         </MapView>

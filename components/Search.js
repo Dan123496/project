@@ -10,7 +10,7 @@ import { getDistance } from 'geolib'
 
 async function requestLocationPermission() {
   try {
-    const granted = await PermissionsAndroid.request(
+    const granted = await PermissionsAndroid.request( // request permisitoion to use users location 
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
         title: 'Location Permission',
@@ -50,17 +50,17 @@ class Search extends Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount () { // runs the find coordinates functions when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.findCoordinates()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
     
-  handleSearch = (search1) => {
+  handleSearch = (search1) => { // hadlers to change state when the value of the search bar, pickers and checkboxs are changed 
     this.setState({ search: search1 })
   }
   handleAvgOverall = (overallValue) => {
@@ -87,28 +87,28 @@ class Search extends Component {
     
 
   async searchAll (searched, Overall, Price, Quality, Cleanliness, Fav, Your) {
-    const theKey = await AsyncStorage.getItem('@session_token')
-    let searchParms = searched
-    if (!(searched == null)) {
+    const theKey = await AsyncStorage.getItem('@session_token') 
+    let searchParms = searched // will search if the search bar is not empty
+    if (!(searched == null)) { 
       if (!(Overall == null)) {
-        searchParms = searchParms + '&overall_rating=' + Overall.toString()
+        searchParms = searchParms + '&overall_rating=' + Overall.toString() //adds overall rating to the search if a value has be selected 
       }
       if (!(Price == null)) {
-        searchParms = searchParms + '&price_rating=' + Price.toString()
+        searchParms = searchParms + '&price_rating=' + Price.toString() //adds price rating to the search if a value has be selected 
       }
       if (!(Quality == null)) {
-        searchParms = searchParms + '&quality_rating=' + Quality.toString()
+        searchParms = searchParms + '&quality_rating=' + Quality.toString() //adds quality rating to the search if a value has be selected 
       }
       if (!(Cleanliness == null)) {
-        searchParms = searchParms + '&clenliness_rating=' + Cleanliness.toString()
+        searchParms = searchParms + '&clenliness_rating=' + Cleanliness.toString() //adds clenliness rating to the search if a value has be selected 
       }
       if (Fav === true) {
-        searchParms = searchParms + '&search_in=favourite'
+        searchParms = searchParms + '&search_in=favourite' // adds in favouourites to the search if the in favourites checkbox has been checked 
       }
       if (Your === true) {
-        searchParms = searchParms + '&search_in=reviewed'
+        searchParms = searchParms + '&search_in=reviewed' // adds in reviewed to the search if the your reviews checkbox has been checked 
       }
-      return fetch('http://10.0.2.2:3333/api/1.0.0/find?q=' + searchParms, {
+      return fetch('http://10.0.2.2:3333/api/1.0.0/find?q=' + searchParms, { // sends a get request to the find endpoint, using all the search parameters
         method: 'get',
         headers: {
           'content-Type': 'application/json',
@@ -140,7 +140,7 @@ class Search extends Component {
     }
   }
     
-    findCoordinates = () =>{
+    findCoordinates = () =>{ // finds the users coordinates with geolocation, stores coordinates in state
       if(!this.state.locationPermission){
         this.setState({locationPermission:  requestLocationPermission() })
       }
@@ -161,7 +161,7 @@ class Search extends Component {
     }
     
 
-  testAddReview (location) { 
+  testAddReview (location) { // makes sure location id is not null
     if ((location == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -175,7 +175,7 @@ class Search extends Component {
     this.props.navigation.navigate('AddReview')
   }
 
-  testToReviews (location2) {
+  testToReviews (location2) { // makes sure location id is not null
     if ((location2 == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -189,7 +189,7 @@ class Search extends Component {
     this.props.navigation.navigate('Reviews')
   }
 
-  testFavourite (location) {
+  testFavourite (location) { // makes sure location id is not null
     if ((location == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -198,7 +198,7 @@ class Search extends Component {
     }
   }
 
-  testUnFavourite (location) {
+  testUnFavourite (location) { // makes sure location id is not null
     if ((location == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -207,7 +207,7 @@ class Search extends Component {
     }
   }
 
-  async favouriteLocation (location) {
+  async favouriteLocation (location) { // sends post request to the favourite endpoint using the id of the location selected
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/favourite', {
       method: 'post',
@@ -238,7 +238,7 @@ class Search extends Component {
       })
   }
 
-  async unFavouriteLocation (location, index) {
+  async unFavouriteLocation (location, index) { // sends delete request to the favourite endpoint using the id of the location selected to un favourite location
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/favourite', {
       method: 'delete',
@@ -275,7 +275,7 @@ class Search extends Component {
       })
   }
 
-  isFavourite (id) {
+  isFavourite (id) { // check if a location is in the users favourites
     const t = this.state.favLoc.includes(id)
     if (t === true) {
       const index = this.state.favLoc.indexOf(id)
@@ -294,13 +294,13 @@ class Search extends Component {
           style={styles.button2}
           onPress={() => this.testFavourite(id)}
         >
-          <Text style={styles.buttonText2}>Make a Favourite Location </Text>
+          <Text style={styles.buttonText2}>Add to Favourites</Text>
         </TouchableOpacity>
       )
     }
   }
 
-  addStar (id) {
+  addStar (id) { // renders a star if the location id is in the users favourites
     const t = this.state.favLoc.includes(id)
     if (t === true) {
       return (
@@ -309,7 +309,7 @@ class Search extends Component {
     }
   }
 
-  distance (lat1, long1, lat2, long2) {
+  distance (lat1, long1, lat2, long2) { // caculates if the distance between users coordinates and location coordinates 
     return (
       getDistance(
         { latitude: lat1, longitude: long1 },
@@ -320,13 +320,13 @@ class Search extends Component {
 
   nearOrNot () {
     if (this.state.toggleNearBox === true) {
-      return (
+      return (  // if the check boxs is  check, will only display  locations that are with in 10km 
         <FlatList
           style={styles.view}
           data={this.state.SearchListData}
           renderItem={({ item, index }) => {
-            console.log(this.distance(this.state.latitude1, this.state.longitude1, item.latitude, item.longitude))
-            if ((this.distance(this.state.latitude1, this.state.longitude1, item.latitude, item.longitude)) <= 10000) {
+            console.log(this.distance(this.state.latitude1, this.state.longitude1, item.latitude, item.longitude)) 
+            if ((this.distance(this.state.latitude1, this.state.longitude1, item.latitude, item.longitude)) <= 10000) {// if the result of this.distances is under 10km, will render the location 
               return (
                 <View>
                   <Text>Location Name : {item.location_name}</Text>
@@ -361,7 +361,7 @@ class Search extends Component {
         />
       )
     } else if (this.state.toggleNearBox === false) {
-      return (
+      return ( // if the check boxs is not check, will display all locations that met search parameters 
         <FlatList
           style={styles.view}
           data={this.state.SearchListData}

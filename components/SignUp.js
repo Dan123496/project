@@ -12,13 +12,13 @@ class signUp extends Component {
     }
   }
 
-  async signup () {
+  async signup () { // signs up the user 
     if ((this.state.first_name.trim().length <= 0 || this.state.last_name.trim().length <= 0 || this.state.email.trim().length <= 0 || this.state.password.trim().length <= 0)) {
-      Alert.alert('Please fill ever fild', [
+      Alert.alert('Please fill ever fild', [ // if any of the fields are empty, ask user to fill in all fields
         { text: 'Ok' }
       ])
     } else {
-      return fetch('http://10.0.2.2:3333/api/1.0.0/user',
+      return fetch('http://10.0.2.2:3333/api/1.0.0/user', // sends post to user endpoint to make a new user 
         {
           method: 'post',
           headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ class signUp extends Component {
         .then(async (responseJson) => {
           console.log('User create with ID', responseJson);
           ToastAndroid.show('Account Created', ToastAndroid.SHORT)
-          this.props.navigation.navigate('SignIn')
+          this.props.navigation.navigate('SignIn') // navigates the user to  sign in page so they can sign in 
         })
         .catch((error) => {
           console.error(error);

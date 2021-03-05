@@ -13,7 +13,7 @@ class Locations extends Component {
     }
   }
 
-  async getData () {
+  async getData () { // gets the location information by sending get requset to the find endpoint
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/find?limit=1000', {
       method: 'get',
@@ -33,7 +33,7 @@ class Locations extends Component {
       })
       .then((responseJson) => {
         this.setState({
-          LocationListData: responseJson
+          LocationListData: responseJson // saves the respons in state
         })
         ToastAndroid.show('sucsess', ToastAndroid.SHORT)
       })
@@ -45,23 +45,23 @@ class Locations extends Component {
       })
   }
 
-  async getLocIds () {
+  async getLocIds () { // gets favourite locations from async storage
     const locId = await AsyncStorage.getItem('@locations')
     this.setState({ favLoc: JSON.parse(locId) })
     this.setState({ isLoading: false })
   }
 
-  componentDidMount () {
+  componentDidMount () { // runs the get data function  when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.getData()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
 
-  testAddReview (location) {
+  testAddReview (location) { // makes sure location id is not null
     if ((location == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -70,12 +70,12 @@ class Locations extends Component {
     }
   }
 
-  async addReview (id) {
+  async addReview (id) { // stores the location id in state and navigates the user to the add review page
     await AsyncStorage.setItem('@locationId', id.toString())
     this.props.navigation.navigate('AddReview')
   }
 
-  testToReviews (location2) {
+  testToReviews (location2) { // makes sure location id is not null
     if ((location2 == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -84,12 +84,12 @@ class Locations extends Component {
     }
   }
 
-  async toReviews (id) {
+  async toReviews (id) { // stores the location id in state and navigates the user to the reviews page
     await AsyncStorage.setItem('@locationId', id.toString())
     this.props.navigation.navigate('Reviews')
   }
 
-  async favouriteLocation (location) {
+  async favouriteLocation (location) { // sends post request to the favourite endpoint using the id of the location selected
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/favourite', {
       method: 'post',
@@ -104,7 +104,7 @@ class Locations extends Component {
           const joined = this.state.favLoc.concat(location)
           this.setState({ favLoc: joined })
           console.log(this.state.favLoc)
-          await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc))
+          await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc)) // adds the new location to the favourite array in async storage
           this.getData()
         } else if (response.status === 401) {
           throw 'No logged in '
@@ -121,7 +121,7 @@ class Locations extends Component {
       })
   }
 
-  async unFavouriteLocation (location, index) {
+  async unFavouriteLocation (location, index) { // sends delete request to the favourite endpoint using the id of the location selected to un favourite location
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/favourite', {
       method: 'delete',
@@ -139,7 +139,7 @@ class Locations extends Component {
           console.log(t)
           this.setState({ favLoc: t })
           console.log(this.state.favLoc)
-          await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc))
+          await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc)) // removes the location to the favourite array in async storage
           this.getData()
         } else if (response.status === 401) {
           throw 'No logged in '
@@ -158,7 +158,7 @@ class Locations extends Component {
       })
   }
 
-  testFavourite (location) {
+  testFavourite (location) { // makes sure the location id is not null
     if ((location == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -167,7 +167,7 @@ class Locations extends Component {
     }
   }
 
-  testUnFavourite (location) {
+  testUnFavourite (location) { // makes sure the location id is not null
     if ((location == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -176,9 +176,9 @@ class Locations extends Component {
     }
   }
 
-  isFavourite (id) {
+  isFavourite (id) { // check if a location is in the users favourites
     const t = this.state.favLoc.includes(id)
-    if (t === true) {
+    if (t === true) { // if the location is in the users favourites, renders the remove favourite button
       const index = this.state.favLoc.indexOf(id)
       console.log(index)
       return (
@@ -189,19 +189,19 @@ class Locations extends Component {
           <Text style={styles.buttonText2}>Remove Favourite</Text>
         </TouchableOpacity>
       )
-    } else {
+    } else { // if the location is not in the users favourites, renders the favourite location button
       return (
         <TouchableOpacity
           style={styles.button2}
           onPress={() => this.testFavourite(id)}
         >
-          <Text style={styles.buttonText2}>Make a Favourite Location </Text>
+          <Text style={styles.buttonText2}>Add to Favourites</Text>
         </TouchableOpacity>
       )
     }
   }
 
-  addStar (id) {
+  addStar (id) { // renders a star if the location id is in the users favourites
     let t = this.state.favLoc.includes(id)
     if (t === true) {
       return (

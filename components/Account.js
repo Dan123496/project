@@ -11,25 +11,25 @@ class Account extends Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount () { // runs the login checker when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.LoggedInCheck()
       this.getData()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page unmounts (not in view)
     this.unsubscribe()
   }
 
-  async LoggedInCheck () {
+  async LoggedInCheck () { // check if the user is not logged in by testing if their is a token in aysnc storage, if theres no token, navigates to signin page
     const value = await AsyncStorage.getItem('@session_token')
     if (value == null) {
       this.props.navigation.navigate('SignIn/Out', { screen: 'SignIn' })
     }
   }
 
-  async getData () {
+  async getData () { // gets user information using there id  store from sign in in aysnc storage, fetchs the user info endpoint, store respons json in state
     const theKey = await AsyncStorage.getItem('@session_token')
     const id = await AsyncStorage.getItem('@user_id')
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
@@ -70,7 +70,7 @@ class Account extends Component {
     } else {
       console.log(this.state.AcountListData)
       console.log(this.state.AcountListData.favourite_locations)
-      const navigation = this.props.navigation
+      const navigation = this.props.navigation // displays the user information and buttons to their favourites, likes and their reviews 
       return (
         <ScrollView>
           <Text h2>Your Account</Text>

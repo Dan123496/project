@@ -12,7 +12,7 @@ class accountFav extends Component {
     }
   }
 
-  async getData () {
+  async getData () { // gets the user information by sending a get request to the user info endpoint, using the user id in async storage
     const theKey = await AsyncStorage.getItem('@session_token')
     const id = await AsyncStorage.getItem('@user_id')
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
@@ -56,7 +56,7 @@ class accountFav extends Component {
     }
   }
 
-  async unFavouriteLocation (location) {
+  async unFavouriteLocation (location) { // unfavourites the location by sending a delete request to the favourite endpoint
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/favourite', {
       method: 'delete',
@@ -74,7 +74,7 @@ class accountFav extends Component {
           const remid = this.state.favLoc
           remid.splice(index, 1)
           this.setState({ favLoc: remid })
-          await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc))
+          await AsyncStorage.setItem('@locations', JSON.stringify(this.state.favLoc)) // removes the unfavourited location from the favourite array in async storage so the favourited reviews are carried over to other pages 
           this.getData()
         } else if (response.status === 401) {
           throw 'No logged in '

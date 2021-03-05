@@ -14,7 +14,7 @@ class Home extends Component {
     this.unsubscribe()
   }
 
-  async LoggedInCheck () {
+  async LoggedInCheck () { // check if the user is not logged in by testing if their is a token in aysnc storage, if theres no token, navigates to signin page
     const value = await AsyncStorage.getItem('@session_token')
     if (value == null) {
       this.props.navigation.navigate('SignIn/Out', { screen: 'SignIn' })

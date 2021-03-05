@@ -16,7 +16,7 @@ class editReview extends Component {
     }
   }
   
-  handleOverallInput = (overallValue) => {
+  handleOverallInput = (overallValue) => { // hadlers to change state when the value of the input pickers and inputs are changed 
     this.setState({overall_rating: overallValue})
   }
   handlePriceInput = (priceValue) => {
@@ -34,20 +34,20 @@ class editReview extends Component {
 
   async EditReview (overallRating, priceRating, qualityRating, clenlinessRating, reviewBody) {
     if ((overallRating == null || priceRating == null || qualityRating == null || clenlinessRating == null || reviewBody.trim().length <= 0)) {
-      Alert.alert('Please fill ever fild', [
+      Alert.alert('Please fill ever field', [ // if any of the fields are empty, ask user to fill in all fields
         { text: 'Ok' }
       ])
     } else {
       const filter = new Filter()
       filter.addWords('tea', 'teas', 'cake', 'cakes', 'pastry', 'pastries')
       console.log(reviewBody)
-      reviewBody = reviewBody ? filter.clean(reviewBody) : ''
+      reviewBody = reviewBody ? filter.clean(reviewBody) : '' //runs a filter to fillter out mentions of cakes tea or pastry form the review body
       console.log(reviewBody)
       const locId = await AsyncStorage.getItem('@locationId')
-      const revId = await AsyncStorage.getItem('@reviewId')
+      const revId = await AsyncStorage.getItem('@reviewId') // gets the location id and review id of the review from async storage
       console.log(overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
       const theKey = await AsyncStorage.getItem('@session_token')
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locId + '/review/' + revId, {
+      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locId + '/review/' + revId, { // sends patch request to to edit the review, using the location and review retrieved from async storage 
         method: 'PATCH',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Authorization': theKey },
         body: JSON.stringify({
@@ -63,7 +63,7 @@ class editReview extends Component {
             AsyncStorage.removeItem('@locationId')
             AsyncStorage.removeItem('@reviewId')
             Alert.alert('Review Edited!')
-            this.props.navigation.navigate('Review')
+            this.props.navigation.navigate('Review') // removes the ids from async and navigate the user back to reviews 
           } else if (response.status === 400) {
             throw 'Bad Request'
           } else if (response.status === 401) {

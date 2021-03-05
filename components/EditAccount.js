@@ -14,12 +14,12 @@ class editAccount extends Component {
     }
   }
 
-  async update () {
+  async update () { // stends post request to update account 
     if ((this.state.first_name.trim().length <= 0 || this.state.last_name.trim().length <= 0 || this.state.email.trim().length <= 0 || this.state.password.trim().length <= 0)) {
-      Alert.alert('Please fill ever fild', [
+      Alert.alert('Please fill ever fild', [ // if any of the fields are empty, ask user to fill in all fields
         { text: 'Ok' }
       ])
-    } else if (!(this.state.password === this.state.com_password)) {
+    } else if (!(this.state.password === this.state.com_password)) { // check if the password and confirm password match 
       Alert.alert('Password and confirm Password must be the same', [
         { text: 'Ok' }
       ])
@@ -59,7 +59,7 @@ class editAccount extends Component {
           await AsyncStorage.removeItem('@session_token')
           await AsyncStorage.removeItem('@user_id')
           this.props.navigation.navigate('Coffida', { screen: 'Home' })
-          this.props.navigation.navigate('Account', { screen: 'Account' })
+          this.props.navigation.navigate('Account', { screen: 'Account' }) // logs the user out so they can sign in with their new credentials 
         })
         .catch((error) => {
           console.error(error)

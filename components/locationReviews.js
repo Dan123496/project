@@ -14,11 +14,11 @@ class locationReviews extends Component {
     }
   }
 
-  async getData () {
+  async getData () { // gets the reviews of location the user selected on the location page
     const theKey = await AsyncStorage.getItem('@session_token')
-    const locationId = await AsyncStorage.getItem('@locationId')
+    const locationId = await AsyncStorage.getItem('@locationId') // the location id of the users chosen location that was stored in @locationId on the location page is retrieved
     this.setState({ location: locationId })
-    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locationId, {
+    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locationId, { // fetch the location information of the location id stored i aysnc storage
       method: 'get',
       headers: {
         'content-Type': 'application/json',
@@ -29,14 +29,16 @@ class locationReviews extends Component {
         if (response.status === 200) {
           return response.json()
         } else if (response.status === 401) {
-          throw 'not logged in'
+          const errorMessage = { code: 401, message: 'not logged in' }
+          throw errorMessage
         } else {
-          throw 'something went wrong'
+          const errorMessage = { message: 'somthig when wrong' }
+          throw errorMessage
         }
       })
       .then((responseJson) => {
         this.setState({
-          LocationListData: responseJson
+          LocationListData: responseJson // saves the respons json in state
         })
         ToastAndroid.show('sucsess', ToastAndroid.SHORT)
         this.getLocIds()
@@ -47,22 +49,22 @@ class locationReviews extends Component {
   }
 
   async getLocIds () {
-    const likeId = await AsyncStorage.getItem('@liked')
+    const likeId = await AsyncStorage.getItem('@liked') // retrevse the users likes from async storage and stores in state
     this.setState({ likedIds: JSON.parse(likeId) })
     this.setState({ isLoading: false })
   }
 
-  componentDidMount () {
+  componentDidMount () { // runs the getData again  when the page is on top (in view) so new info is displayed
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.getData()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
 
-  async likeReview (location, review) {
+  async likeReview (location, review) { // likes the review the users click on, using the location id and review id.
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review + '/like', {
       method: 'post',
@@ -77,16 +79,20 @@ class locationReviews extends Component {
           const joined = this.state.likedIds.concat(review)
           this.setState({ likedIds: joined })
           console.log(this.state.likedIds)
-          await AsyncStorage.setItem('@liked', JSON.stringify(this.state.likedIds))
+          await AsyncStorage.setItem('@liked', JSON.stringify(this.state.likedIds)) // updates the liked array in async storage so the new like review is added 
           this.getData()
         } else if (response.status === 401) {
-          throw 'No logged in '
+          const errorMessage = { code: 401, message: 'Unauthorised' }
+          throw errorMessage
         } else if (response.status === 404) {
-          throw 'Bad link '
+          const errorMessage = { code: 404, message: 'Not Found' }
+          throw errorMessage
         } else if (response.status === 400) {
-          throw 'Failed '
+          const errorMessage = { code: 400, message: 'Bad Request' }
+          throw errorMessage
         } else {
-          throw 'somthing went wrong', response.status
+          const errorMessage = { message: 'somthig when wrong' + response.status }
+          throw errorMessage
         }
       })
       .catch((error) => {
@@ -94,7 +100,7 @@ class locationReviews extends Component {
       })
   }
 
-  async UnLikeReview (location, review, index) {
+  async UnLikeReview (location, review, index) { // Unlikes the review the users click on, using the location id and review id.
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review + '/like', {
       method: 'delete',
@@ -112,18 +118,20 @@ class locationReviews extends Component {
           console.log(t)
           this.setState({ likedIds: t })
           console.log(this.state.likedIds)
-          await AsyncStorage.setItem('@liked', JSON.stringify(this.state.likedIds))
+          await AsyncStorage.setItem('@liked', JSON.stringify(this.state.likedIds)) // updates the liked array in async storage so the unlike review is removed
           this.getData()
         } else if (response.status === 401) {
-          throw 'No logged in '
+          const errorMessage = { code: 401, message: 'Unauthorised' }
+          throw errorMessage
         } else if (response.status === 404) {
-          throw 'Bad link '
-        } else if (response.status === 401) {
-          throw 'Unathorised '
-        } else if (response.status === 500) {
-          throw 'Server error '
+          const errorMessage = { code: 404, message: 'Not Found' }
+          throw errorMessage
+        } else if (response.status === 400) {
+          const errorMessage = { code: 400, message: 'Bad Request' }
+          throw errorMessage
         } else {
-          throw 'somthing went wrong', response.status
+          const errorMessage = { message: 'somthig when wrong' + response.status }
+          throw errorMessage
         }
       })
       .catch((error) => {
@@ -131,7 +139,7 @@ class locationReviews extends Component {
       })
   }
 
-  testLike (location, review) {
+  testLike (location, review) { // tests location id and review id are not null
     if ((location == null || review == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -141,7 +149,7 @@ class locationReviews extends Component {
     }
   }
 
-  testUnLike (location, review, index) {
+  testUnLike (location, review, index) { // tests location id and review id are not null
     if ((location == null || review == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -151,9 +159,9 @@ class locationReviews extends Component {
     }
   }
 
-  isLiked (locId, revId) {
+  isLiked (locId, revId) { // check the liked array in async storage to see if user has liked the review
     const t = this.state.likedIds.includes(revId)
-    if (t === true) {
+    if (t === true) { // if the user has liked the review, unlike button is rendered
       const index = this.state.likedIds.indexOf(revId)
       console.log(index)
       return (
@@ -167,7 +175,7 @@ class locationReviews extends Component {
     } else {
       return (
         <TouchableOpacity
-          style={styles.button}
+          style={styles.button} // if the user has not liked the review, like button is rendered
           onPress={() => this.testLike(locId, revId)}
         >
           <Text style={styles.buttonText}>Like</Text>
@@ -176,7 +184,7 @@ class locationReviews extends Component {
     }
   }
 
-  printPhotos (location, review) {
+  printPhotos (location, review) { // prints the reviews photo to screen, if it has one, by linking to the get photo endpoint
     const t = 'http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review + '/photo'
     console.log(t)
     return (
@@ -191,7 +199,7 @@ class locationReviews extends Component {
           <ActivityIndicator />
         </View>
       )
-    } else {
+    } else { // displays the locations reviews, navigation buttons, and like button
       return (
         <View style={styles.view}>
           <Text h2>Reviews :</Text>
@@ -207,6 +215,7 @@ class locationReviews extends Component {
                   <Text>Quality Rating:  {item.quality_rating}</Text>
                   <Text>Clenliness Rating:  {item.clenliness_rating}</Text>
                   <Text>Comment:  {item.review_body}</Text>
+                  <Text>Likes:   {item.likes}</Text>
                   <Text>Photo: </Text>
                   {this.printPhotos(this.state.location, item.review_id)}
                   {this.isLiked(this.state.location, item.review_id)}

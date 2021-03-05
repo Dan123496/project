@@ -18,7 +18,7 @@ class addReviewTab extends Component {
     }
   }
 
-  async getData () {
+  async getData () { // gets the location data from the find end point, to be used as selectible options in the locations picker 
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/find', {
       method: 'get',
@@ -51,7 +51,7 @@ class addReviewTab extends Component {
   componentDidMount () {
     this.getData()
   }
-  handleOverallInput = (overallValue) => {
+  handleOverallInput = (overallValue) => { // hadlers to change state when the value of the input pickers and inputs are changed 
     this.setState({overall_rating: overallValue})
   }
   handlePriceInput = (priceValue) => {
@@ -72,19 +72,19 @@ class addReviewTab extends Component {
     
   async AddReview (overallRating, priceRating, qualityRating, clenlinessRating, reviewBody) {
     if ((overallRating == null || priceRating == null || qualityRating == null || clenlinessRating == null || reviewBody.trim().length <= 0)) {
-      Alert.alert('Please fill ever fild',[
+      Alert.alert('Please fill ever fild',[ // if any of the fields are empty, ask user to fill in all fields
         { text: 'Ok' }
       ])
     } else {
       const filter = new Filter()
       filter.addWords('tea', 'teas', 'cake', 'cakes', 'pastry', 'pastries')
       console.log(reviewBody)
-      reviewBody = reviewBody ? filter.clean(reviewBody) : ''
+      reviewBody = reviewBody ? filter.clean(reviewBody) : '' //runs a filter to fillter out mentions of cakes tea or pastry form the review body
       console.log(reviewBody)
       const id = this.state.LocId
       console.log(id, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
       const theKey = await AsyncStorage.getItem('@session_token')
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + id + '/review', {
+      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + id + '/review', { // sends post request  using the location  retrieved from async storage
         method: 'POST',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Authorization': theKey },
         body: JSON.stringify(

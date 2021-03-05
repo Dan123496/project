@@ -3,30 +3,30 @@ import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 
 class signOut extends Component {
-  componentDidMount () {
+  componentDidMount () { // runs the login checker when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.LoggedInCheck()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
 
-  async LoggedInCheck () {
+  async LoggedInCheck () { // check if the user is not logged in by testing if their is a token in aysnc storage, if theres no token, navigates to signin page
     const value = await AsyncStorage.getItem('@session_token')
     if (value == null) {
       this.props.navigation.navigate('SignIn')
     }
   }
 
-  async userLogout () {
+  async userLogout () { // logs the user out
     try {
       await AsyncStorage.removeItem('@session_token')
-      await AsyncStorage.removeItem('@user_id')
+      await AsyncStorage.removeItem('@user_id') // removes token and login id from async storage so the user is logged out.
       Alert.alert('Logout Success!')
       this.props.navigation.navigate('Coffida', { screen: 'Home' })
-      this.props.navigation.navigate('Account', { screen: 'Account' })
+      this.props.navigation.navigate('Account', { screen: 'Account' }) // navigated the user to the root screen of the home stack and account stack so the user cant navigate any where when not siged in
     } catch (error) {
       console.log('AsyncStorage error: ' + error.message)
     }

@@ -13,7 +13,7 @@ class accountReviews extends Component {
     }
   }
 
-  async getData () {
+  async getData () { // gets the users information by sending a get request to the user info endpoint
     const theKey = await AsyncStorage.getItem('@session_token')
     const id = await AsyncStorage.getItem('@user_id')
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
@@ -44,17 +44,17 @@ class accountReviews extends Component {
       })
   }
 
-  componentDidMount () {
+  componentDidMount () { // runs the login checker when the page is on top (in view)
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.getData()
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount () { // stop running listener when the page un mounts (not in view)
     this.unsubscribe()
   }
 
-  testDelete (location, review) {
+  testDelete (location, review) { // makes sure the location id and review id are not null before attempting to delete
     if ((location == null || review == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -62,7 +62,7 @@ class accountReviews extends Component {
     }
   }
 
-  async DeleteReview (location, review) {
+  async DeleteReview (location, review) { // delets the review by sending delete request using the selected location id and review id
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review, {
       method: 'delete',
@@ -94,7 +94,7 @@ class accountReviews extends Component {
       })
   }
 
-  testEdit (location, review) {
+  testEdit (location, review) { // makes sure the location id and review id are not null
     if ((location == null || review == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -102,13 +102,13 @@ class accountReviews extends Component {
     }
   }
 
-  async editReview (location, review) {
+  async editReview (location, review) { // stores the location id and review id of the selected review  in async storage and then sends the user to the edit page
     await AsyncStorage.setItem('@locationId', location.toString())
     await AsyncStorage.setItem('@reviewId', review.toString())
     this.props.navigation.navigate('EditReview')
   }
 
-  testPhoto (location, review) {
+  testPhoto (location, review) { // makes sure the location id and review id are not null
     if ((location == null || review == null)) {
       ToastAndroid.show('error', ToastAndroid.SHORT)
     } else {
@@ -116,13 +116,13 @@ class accountReviews extends Component {
     }
   }
 
-  async AddPhoto (location, review) {
+  async AddPhoto (location, review) { // stores the location id and review id of the selected review  in async storage and then sends the user to the camera page
     await AsyncStorage.setItem('@locationId', location.toString())
     await AsyncStorage.setItem('@reviewId', review.toString())
     this.props.navigation.navigate('Camera')
   }
 
-  async RemovePhoto (location, review) {
+  async RemovePhoto (location, review) { // sends a delete request to the photo endpiot using the selected location id and user id 
     const theKey = await AsyncStorage.getItem('@session_token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review + '/photo', {
       method: 'delete',
@@ -153,12 +153,12 @@ class accountReviews extends Component {
       })
   }
 
-  async whichfunction (location, review) {
+  async whichfunction (location, review) { // checks which function to run when the user clicks the add/remove photo button
     fetch('http://10.0.2.2:3333/api/1.0.0/location/' + location + '/review/' + review + '/photo')
       .then(res => {
-        if (res.status === 404) {
+        if (res.status === 404) { // if there is no photo in the uri, runs the add photo function
           this.AddPhoto(location, review)
-        } else if (res.status === 200) {
+        } else if (res.status === 200) { // if there is a photo in the uri, runs the remove photo function
           this.RemovePhoto(location, review)
         }
       })
@@ -193,6 +193,7 @@ class accountReviews extends Component {
                 <Text>Quality Rating:  {item.review.quality_rating}</Text>
                 <Text>Clenliness Rating:  {item.review.clenliness_rating}</Text>
                 <Text>Comment:  {item.review.review_body}</Text>
+                <Text>Likes:   {item.review.likes}</Text>
                 <Text>Photo: </Text>
                 <Image style={styles.photo} source={{ uri: 'http://10.0.2.2:3333/api/1.0.0/location/' + item.location.location_id + '/review/' + item.review.review_id + '/photo?time=' + new Date() }} />
                 <View style={styles.box}>

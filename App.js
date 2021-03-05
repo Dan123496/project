@@ -9,7 +9,7 @@ class HelloWorldApp extends Component { // main app class
   render () { // renders the drawer navigator for the application
     return (
       <NavigationContainer>
-        <DrawNavigation /> 
+        <DrawNavigation />
       </NavigationContainer>
     )
   }
