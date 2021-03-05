@@ -1,8 +1,0 @@
-alerts https://reactnative.dev/docs/alert
-ionicons website https://ionicons.com/ 
-tab navigation https://reactnavigation.org/docs/tab-based-navigation/
-react native colours https://reactnative.dev/docs/colors
-stylesheets https://reactnative.dev/docs/stylesheet
-react native tutorial https://www.youtube.com/watch?v=ur6I5m2nTvk&list=PL4cUxeGkcC9ixPU-QkScoRBVxtPPzVjrQ&index=1&ab_channel=TheNetNinja
-callbacks and promises https://scotch.io/courses/10-need-to-know-javascript-concepts/callbacks-promises-and-async
-api tutorial https://idratherbewriting.com/learnapidoc/pubapis_openapi_step1_openapi_object.html

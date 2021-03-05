@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
-import { ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { ScrollView, Text, TextInput, View, TouchableOpacity, StyleSheet, Alert, ToastAndroid } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select'
 import Filter from 'bad-words'
 
-class editReview extends Component {
+class addReviewTab extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -12,10 +12,45 @@ class editReview extends Component {
       price_rating: '',
       quality_rating: '',
       clenliness_rating: '',
-      review_body: ''
+      review_body: '',
+      LocationListData: [],
+      LocId: ''
     }
   }
-  
+
+  async getData () {
+    const theKey = await AsyncStorage.getItem('@session_token')
+    return fetch('http://10.0.2.2:3333/api/1.0.0/find', {
+      method: 'get',
+      headers: {
+        'content-Type': 'application/json',
+        'X-Authorization': theKey
+      }
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json()
+        } else if (response.status === 401) {
+          throw 'not logged in'
+        } else {
+          throw 'something went wrong'
+        }
+      })
+      .then((responseJson) => {
+        this.setState({
+          isLoading: false,
+          LocationListData: responseJson
+        })
+        ToastAndroid.show('sucsess', ToastAndroid.SHORT)
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+  }
+
+  componentDidMount () {
+    this.getData()
+  }
   handleOverallInput = (overallValue) => {
     this.setState({overall_rating: overallValue})
   }
@@ -31,10 +66,13 @@ class editReview extends Component {
   handleBodyInput = (bodyValue) => {
     this.setState({review_body: bodyValue})
   }
-
-  async EditReview (overallRating, priceRating, qualityRating, clenlinessRating, reviewBody) {
+  handleLocationId =(locIdValue) =>{
+    this.setState({LocId: locIdValue})
+  }
+    
+  async AddReview (overallRating, priceRating, qualityRating, clenlinessRating, reviewBody) {
     if ((overallRating == null || priceRating == null || qualityRating == null || clenlinessRating == null || reviewBody.trim().length <= 0)) {
-      Alert.alert('Please fill ever fild', [
+      Alert.alert('Please fill ever fild',[
         { text: 'Ok' }
       ])
     } else {
@@ -43,37 +81,28 @@ class editReview extends Component {
       console.log(reviewBody)
       reviewBody = reviewBody ? filter.clean(reviewBody) : ''
       console.log(reviewBody)
-      const locId = await AsyncStorage.getItem('@locationId')
-      const revId = await AsyncStorage.getItem('@reviewId')
-      console.log(overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
+      const id = this.state.LocId
+      console.log(id, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
       const theKey = await AsyncStorage.getItem('@session_token')
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locId + '/review/' + revId, {
-        method: 'PATCH',
+      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + id + '/review', {
+        method: 'POST',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Authorization': theKey },
-        body: JSON.stringify({
-          overall_rating: parseInt(overallRating),
-          price_rating: parseInt(priceRating),
-          quality_rating: parseInt(qualityRating),
-          clenliness_rating: parseInt(clenlinessRating),
-          review_body: reviewBody
-        })
+        body: JSON.stringify(
+          {
+            overall_rating: parseInt(overallRating),
+            price_rating: parseInt(priceRating),
+            quality_rating: parseInt(qualityRating),
+            clenliness_rating: parseInt(clenlinessRating),
+            review_body: reviewBody
+          })
       })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.status === 201) {
             AsyncStorage.removeItem('@locationId')
-            AsyncStorage.removeItem('@reviewId')
-            Alert.alert('Review Edited!')
-            this.props.navigation.navigate('Review')
+            Alert.alert('Review.Added!')
+            this.props.navigation.navigate('Locations')
           } else if (response.status === 400) {
-            throw 'Bad Request'
-          } else if (response.status === 401) {
-            throw 'Unauthorised'
-          } else if (response.status === 403) {
-            throw 'Forbidden'
-          } else if (response.status === 404) {
-            throw 'Not Found'
-          } else if (response.status === 500) {
-            throw 'Server Error'
+            throw 'Failed validation'
           } else {
             throw 'somthing went wrong', response.status
           }
@@ -87,17 +116,30 @@ class editReview extends Component {
   render () {
     return (
       <ScrollView style={styles.all}>
+        <View>
+          <RNPickerSelect
+            style={pickerSelectStyles}
+            placeholder={{ label: 'Select a Location....', value: null }}
+            onValueChange={this.handleLocationId} value={this.state.LocId}
+            items={this.state.LocationListData.map(item => ({
+              key: item.location_id,
+              label: ' ' + item.location_name + ':     ' + item.location_town,
+              value: item.location_id,
+              color: 'black'
+            }))}
+          />
+        </View>
         <Text style={styles.text}>Overall Rating</Text>
         <RNPickerSelect
           style={pickerSelectStyles}
           placeholder={{ label: 'Select a Rating', value: null }}
           onValueChange={this.handleOverallInput} value={this.state.overall_rating}
           items={[
-            { label: '1', value: 1 },
-            { label: '2', value: 2 },
-            { label: '3', value: 3 },
-            { label: '4', value: 4 },
-            { label: '5', value: 5 }
+            { label: '      1', value: 1 },
+            { label: '      2', value: 2 },
+            { label: '      3', value: 3 },
+            { label: '      4', value: 4 },
+            { label: '      5', value: 5 }
           ]}
         />
         <Text style={styles.text}>Price Rating</Text>
@@ -106,11 +148,11 @@ class editReview extends Component {
           placeholder={{ label: 'Select a Rating', value: null }}
           onValueChange={this.handlePriceInput} value={this.state.price_rating}
           items={[
-            { label: '1', value: 1 },
-            { label: '2', value: 2 },
-            { label: '3', value: 3 },
-            { label: '4', value: 4 },
-            { label: '5', value: 5 }
+            { label: '      1', value: 1 },
+            { label: '      2', value: 2 },
+            { label: '      3', value: 3 },
+            { label: '      4', value: 4 },
+            { label: '      5', value: 5 }
           ]}
         />
         <Text style={styles.text}>Quality Rating</Text>
@@ -119,11 +161,11 @@ class editReview extends Component {
           placeholder={{ label: 'Select a Rating', value: null }}
           onValueChange={this.handleQualityInput} value={this.state.quality_rating}
           items={[
-            { label: '1', value: 1 },
-            { label: '2', value: 2 },
-            { label: '3', value: 3 },
-            { label: '4', value: 4 },
-            { label: '5', value: 5 }
+            { label: '      1', value: 1 },
+            { label: '      2', value: 2 },
+            { label: '      3', value: 3 },
+            { label: '      4', value: 4 },
+            { label: '      5', value: 5 }
           ]}
         />
         <Text style={styles.text}>Clenliness Rating</Text>
@@ -132,29 +174,28 @@ class editReview extends Component {
           placeholder={{ label: 'Select a Rating', value: null }}
           onValueChange={this.handleClenlinessInput} value={this.state.clenliness_rating}
           items={[
-            { label: '1', value: 1 },
-            { label: '2', value: 2 },
-            { label: '3', value: 3 },
-            { label: '4', value: 4 },
-            { label: '5', value: 5 }
+            { label: '      1', value: 1 },
+            { label: '      2', value: 2 },
+            { label: '      3', value: 3 },
+            { label: '      4', value: 4 },
+            { label: '      5', value: 5 }
           ]}
         />
         <Text style={styles.text1}>Add a Comment</Text>
         <TextInput
-          style={styles.input} placeholder='Add your comment here...'
-          onChangeText={this.handleBodyInput}
-          value={this.state.review_body}
-          multiline={true}
-          numberOfLines={5}
+          style={styles.input}
+          placeholder='Add your comment here...'
+          onChangeText={this.handleBodyInput} value={this.state.review_body}
+          multiline={true} numberOfLines={5}
         />
         <TouchableOpacity
           style={styles.button}
-          onPress={() => this.EditReview(this.state.overall_rating, this.state.price_rating, this.state.quality_rating, this.state.clenliness_rating, this.state.review_body)}
+          onPress={() => this.AddReview(this.state.overall_rating, this.state.price_rating, this.state.quality_rating, this.state.clenliness_rating, this.state.review_body)}
         >
           <Text style={styles.buttonText}>Add Review</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button2}
+          style={styles.button}
           onPress={() => this.props.navigation.goBack()}
         >
           <Text style={styles.buttonText}>Go Back</Text>
@@ -163,6 +204,7 @@ class editReview extends Component {
     )
   }
 }
+
 const styles = StyleSheet.create({
   all: {
     backgroundColor: 'silver',
@@ -176,16 +218,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'blue',
     padding: 10,
-    margin: 15,
-    borderRadius: 10
-  },
-  button2: {
-    alignItems: 'center',
-    backgroundColor: 'blue',
-    padding: 10,
-    margin: 15,
+    margin: 10,
     borderRadius: 10,
-    marginBottom: 40
+    marginBottom: 50
   },
   buttonText: {
     fontSize: 20,
@@ -212,7 +247,8 @@ const styles = StyleSheet.create({
 })
 const pickerSelectStyles = StyleSheet.create({
   placeholder: {
-    color: 'grey'
+    color: 'grey',
+    fontSize: 20
   },
   inputIOS: {
     fontSize: 16,
@@ -225,7 +261,7 @@ const pickerSelectStyles = StyleSheet.create({
     paddingRight: 30
   },
   inputAndroid: {
-    fontSize: 16,
+    fontSize: 20,
     margin: 10,
     borderColor: 'black',
     borderRadius: 8,
@@ -234,4 +270,4 @@ const pickerSelectStyles = StyleSheet.create({
     paddingRight: 30
   }
 })
-export default editReview
+export default addReviewTab

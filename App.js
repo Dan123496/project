@@ -1,45 +1,17 @@
-import 'react-native-gesture-handler';
-import React, { Component } from 'react';
-import {View} from 'react-native';
+import 'react-native-gesture-handler'
+import React, { Component } from 'react'
 
-import { NavigationContainer } from '@react-navigation/native';
-//import { createStackNavigator } from '@react-navigation/stack';
-//import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-//import {createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native'
 
+import DrawNavigation from './components/DrawNavigation'
 
-//import  Ionicons  from 'react-native-vector-icons/Ionicons';
-//import AsyncStorage from '@react-native-async-storage/async-storage';
-//import TabNavigator from './components/tabNavigator';
-import DrawNavigation from './components/DrawNavigation';
-//import TabNavigator from './components/TabNavigator';
-
-
-
-
-
-
-class HelloWorldApp extends Component{
-    
-    render(){
-        
-        
-        return (
-          
-              
-            <NavigationContainer>
-                <DrawNavigation/>
-            </NavigationContainer>
-              
-              
-              
-          
-        );
-    }
-
-
+class HelloWorldApp extends Component { // main app class
+  render () { // renders the drawer navigator for the application
+    return (
+      <NavigationContainer>
+        <DrawNavigation /> 
+      </NavigationContainer>
+    )
+  }
 }
-
-export default HelloWorldApp;
-
-    
+export default HelloWorldApp
